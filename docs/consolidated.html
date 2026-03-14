@@ -6,198 +6,166 @@
   <title>Stellar SDEX Hummingbot Connector - Consolidated Technical Architecture</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
-    :root {
-      --stellar-blue: #0096D6;
-      --stellar-dark: #0A1628;
-      --stellar-mid: #1E3A5F;
-      --hbot-orange: #F97316;
-      --success: #16A34A;
-      --error: #DC2626;
-      --warning: #D97706;
-      --bg: #F8FAFC;
-      --card: #FFFFFF;
-      --border: #E2E8F0;
-      --text: #1E293B;
-      --text-light: #64748B;
-      --code-bg: #0F172A;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
       line-height: 1.75;
-      font-size: 15px;
+      font-size: 16px;
     }
 
-    .cover {
-      background: var(--stellar-dark);
-      color: white;
-      padding: 72px 60px 56px;
+    .doc-header {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 40px 32px;
+      border-bottom: 1px solid #d0d7de;
     }
 
-    .cover-badge {
-      display: inline-block;
-      background: #1E3A5F;
-      border: 1px solid #334E6B;
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 11px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      color: #CBD5E1;
-    }
-
-    .cover h1 {
-      font-size: 34px;
+    .doc-header h1 {
+      font-size: 28px;
       font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 10px;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      line-height: 1.3;
     }
 
-    .cover-sub {
-      color: #CBD5E1;
+    .doc-header .doc-subtitle {
       font-size: 15px;
-      margin-top: 6px;
+      color: #656d76;
+      margin-bottom: 20px;
     }
 
-    .cover-meta {
-      display: flex;
-      gap: 36px;
-      margin-top: 32px;
-      flex-wrap: wrap;
-    }
-
-    .cover-meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .cover-meta-label {
-      font-size: 10px;
-      color: #94A3B8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .cover-meta-value {
+    .doc-meta {
       font-size: 14px;
-      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.8;
+    }
+
+    .doc-meta dt {
+      display: inline;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .doc-meta dd {
+      display: inline;
+      margin-left: 0;
+      margin-right: 24px;
+      color: #333;
     }
 
     .toc {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 60px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 40px;
+      border-bottom: 1px solid #d0d7de;
     }
 
     .toc-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-light);
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
       margin-bottom: 10px;
     }
 
-    .toc-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    .toc ol {
+      margin: 0;
+      padding-left: 20px;
+      columns: 2;
+      column-gap: 32px;
     }
 
-    .toc-links a {
-      font-size: 13px;
-      color: var(--stellar-blue);
+    .toc li {
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #1a1a1a;
+    }
+
+    .toc a {
+      color: #0969da;
       text-decoration: none;
-      background: #EFF6FF;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid #BFDBFE;
-      transition: all 0.15s;
     }
 
-    .toc-links a:hover {
-      background: var(--stellar-blue);
-      color: white;
+    .toc a:hover {
+      text-decoration: underline;
     }
 
     .container {
-      max-width: 960px;
+      max-width: 800px;
       margin: 0 auto;
-      padding: 52px 40px;
+      padding: 40px 40px;
     }
 
     section {
-      margin-bottom: 60px;
+      margin-bottom: 48px;
     }
 
     .section-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 22px;
-      padding-bottom: 14px;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .section-number {
-      background: var(--stellar-blue);
-      color: white;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      flex-shrink: 0;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #d0d7de;
     }
 
     .section-header h2 {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 700;
-      color: var(--stellar-dark);
+      color: #1a1a1a;
     }
 
     h3 {
       font-size: 16px;
       font-weight: 600;
-      color: var(--stellar-dark);
-      margin: 28px 0 10px;
+      color: #1a1a1a;
+      margin: 24px 0 10px;
+    }
+
+    h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin: 20px 0 8px;
     }
 
     p {
       margin-bottom: 14px;
-      color: #334155;
+      color: #333;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     .callout {
-      border-radius: 8px;
       padding: 14px 18px;
       margin: 18px 0;
       border-left: 3px solid;
       font-size: 14px;
+      border-radius: 0;
     }
 
-    .callout p { margin: 0; }
+    .callout p { margin: 0; color: #333; }
 
     .callout-info {
-      background: #EFF6FF;
-      border-color: var(--stellar-blue);
-      color: #1D4ED8;
+      background: #f6f8fa;
+      border-color: #0969da;
+    }
+
+    .callout-warning {
+      background: #fff8c5;
+      border-color: #9a6700;
     }
 
     .table-wrap {
       overflow-x: auto;
       margin: 18px 0;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      border: 1px solid #d0d7de;
     }
 
     table {
@@ -207,51 +175,51 @@
     }
 
     thead th {
-      background: var(--stellar-dark);
-      color: white;
-      padding: 11px 16px;
+      background: #f6f8fa;
+      color: #1a1a1a;
+      padding: 10px 14px;
       text-align: left;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      border-bottom: 1px solid #d0d7de;
     }
 
-    tbody tr:nth-child(even) { background: #F8FAFC; }
     tbody tr { background: white; }
 
     tbody td {
-      padding: 11px 16px;
-      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      border-top: 1px solid #d0d7de;
       vertical-align: top;
-      color: #334155;
-      font-size: 13.5px;
+      color: #333;
+      font-size: 14px;
     }
 
     tbody td:first-child {
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
       font-size: 13px;
-      color: #334155;
+      color: #1a1a1a;
     }
 
     pre {
-      background: var(--code-bg);
-      color: #E2E8F0;
-      padding: 18px 22px;
-      border-radius: 10px;
+      background: #f6f8fa;
+      color: #1a1a1a;
+      padding: 16px 20px;
+      border: 1px solid #d0d7de;
       overflow-x: auto;
       font-size: 13px;
       line-height: 1.65;
       margin: 14px 0;
-      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
     }
 
     code {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 12px;
-      background: #F1F5F9;
-      color: #7C3AED;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      background: #f6f8fa;
+      color: #1a1a1a;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 3px;
+      border: 1px solid #d0d7de;
     }
 
     pre code {
@@ -259,37 +227,22 @@
       color: inherit;
       padding: 0;
       font-size: inherit;
+      border: none;
     }
 
     .diagram-wrap {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #d0d7de;
       padding: 24px;
-      margin: 22px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin: 18px 0;
       overflow-x: auto;
     }
 
     .diagram-label {
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--text-light);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .diagram-label::before {
-      content: '';
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      background: var(--stellar-blue);
-      border-radius: 50%;
+      color: #656d76;
+      margin-bottom: 16px;
     }
 
     .mermaid {
@@ -300,31 +253,26 @@
 
     .ref-link {
       display: inline-block;
-      font-size: 12px;
-      color: var(--stellar-blue);
-      margin-bottom: 16px;
+      font-size: 13px;
+      color: #656d76;
+      margin-bottom: 12px;
     }
 
     .evidence-link {
       display: inline-block;
       font-size: 13px;
-      color: var(--stellar-blue);
+      color: #0969da;
       text-decoration: none;
-      background: #EFF6FF;
-      padding: 4px 12px;
-      border-radius: 6px;
-      border: 1px solid #BFDBFE;
       margin-top: 8px;
     }
 
     .evidence-link:hover {
-      background: var(--stellar-blue);
-      color: white;
+      text-decoration: underline;
     }
 
     ul {
       margin: 8px 0 14px 24px;
-      color: #334155;
+      color: #333;
     }
 
     li {
@@ -332,15 +280,17 @@
     }
 
     footer {
-      background: var(--stellar-dark);
-      color: #94A3B8;
+      max-width: 800px;
+      margin: 48px auto 0;
+      padding: 24px 40px;
+      border-top: 1px solid #d0d7de;
       text-align: center;
-      padding: 22px;
       font-size: 13px;
-      margin-top: 60px;
+      color: #656d76;
     }
 
-    footer a { color: var(--stellar-blue); text-decoration: none; }
+    footer a { color: #0969da; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -350,82 +300,66 @@
     startOnLoad: true,
     theme: 'base',
     themeVariables: {
-      primaryColor: '#0096D6',
-      primaryTextColor: '#1E293B',
-      primaryBorderColor: '#0074A8',
-      lineColor: '#64748B',
-      secondaryColor: '#1E3A5F',
-      tertiaryColor: '#F1F5F9',
+      primaryColor: '#d0d7de',
+      primaryTextColor: '#1a1a1a',
+      primaryBorderColor: '#656d76',
+      lineColor: '#656d76',
+      secondaryColor: '#eef1f5',
+      tertiaryColor: '#f6f8fa',
       background: '#ffffff',
-      fontFamily: 'Inter, -apple-system, sans-serif',
+      fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
       fontSize: '14px',
-      edgeLabelBackground: '#F8FAFC',
-      signalColor: '#1E293B',
-      signalTextColor: '#1E293B',
-      actorBkg: '#0096D6',
-      actorTextColor: '#ffffff',
-      actorBorder: '#0074A8',
-      actorLineColor: '#64748B',
-      noteBkgColor: '#EFF6FF',
-      noteTextColor: '#1E293B',
-      noteBorderColor: '#BFDBFE',
-      activationBkgColor: '#EFF6FF',
-      activationBorderColor: '#0096D6',
+      edgeLabelBackground: '#ffffff',
+      signalColor: '#1a1a1a',
+      signalTextColor: '#1a1a1a',
+      actorBkg: '#f6f8fa',
+      actorTextColor: '#1a1a1a',
+      actorBorder: '#656d76',
+      actorLineColor: '#656d76',
+      noteBkgColor: '#f6f8fa',
+      noteTextColor: '#1a1a1a',
+      noteBorderColor: '#d0d7de',
+      activationBkgColor: '#f6f8fa',
+      activationBorderColor: '#656d76',
       sequenceNumberColor: '#ffffff',
-      labelBoxBkgColor: '#EFF6FF',
-      labelBoxBorderColor: '#BFDBFE',
-      labelTextColor: '#1E293B',
-      loopTextColor: '#1E293B',
+      labelBoxBkgColor: '#f6f8fa',
+      labelBoxBorderColor: '#d0d7de',
+      labelTextColor: '#1a1a1a',
+      loopTextColor: '#1a1a1a',
       messageFontSize: '13px',
-      messageTextColor: '#1E293B'
+      messageTextColor: '#1a1a1a'
     },
     flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: true },
     sequence: { useMaxWidth: true, mirrorActors: false, boxMargin: 10, messageFontSize: 13, noteFontSize: 13, actorFontSize: 14 }
   });
 </script>
 
-<div class="cover">
-  <div class="cover-badge">Consolidated Technical Architecture</div>
+<div class="doc-header">
   <h1>Stellar SDEX Hummingbot Connector</h1>
-  <p class="cover-sub">Key architectural decisions and diagrams. Each section cites the full architecture document for deeper detail.</p>
-  <div class="cover-meta">
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Version</span>
-      <span class="cover-meta-value">2.0</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Date</span>
-      <span class="cover-meta-value">March 14, 2026</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Authors</span>
-      <span class="cover-meta-value">Tharun Ekambaram &amp; Daniel Zilper</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Full Document</span>
-      <span class="cover-meta-value"><a href="index.html" style="color: #93C5FD; text-decoration: none;">14-Section Technical Architecture</a></span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Testnet Prototype</span>
-      <span class="cover-meta-value"><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc" style="color: #93C5FD; text-decoration: none;">GitHub Repository</a></span>
-    </div>
-  </div>
+  <p class="doc-subtitle">Consolidated Technical Architecture. Key architectural decisions and diagrams. Each section cites the full architecture document for deeper detail.</p>
+  <dl class="doc-meta">
+    <dt>Version:</dt> <dd>2.0</dd>
+    <dt>Date:</dt> <dd>March 14, 2026</dd>
+    <dt>Authors:</dt> <dd>Tharun Ekambaram &amp; Daniel Zilper</dd>
+    <dt>Full Document:</dt> <dd><a href="index.html">14-Section Technical Architecture</a></dd>
+    <dt>Testnet Prototype:</dt> <dd><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc">GitHub Repository</a></dd>
+  </dl>
 </div>
 
 <div class="toc">
   <div class="toc-label">Contents</div>
-  <div class="toc-links">
-    <a href="#arch">1. System Architecture</a>
-    <a href="#tx">2. Transaction Flow</a>
-    <a href="#channels">3. Channel Accounts</a>
-    <a href="#orders">4. Order Lifecycle</a>
-    <a href="#fills">5. Fill Detection</a>
-    <a href="#orderbook">6. Orderbook Data</a>
-    <a href="#balance">7. Balance Management</a>
-    <a href="#errors">8. Error Recovery</a>
-    <a href="#amm">9. AMM Integration</a>
-    <a href="#prototype">10. Testnet Prototype</a>
-  </div>
+  <ol>
+    <li><a href="#arch">System Architecture</a></li>
+    <li><a href="#tx">Transaction Flow</a></li>
+    <li><a href="#channels">Channel Accounts</a></li>
+    <li><a href="#orders">Order Lifecycle</a></li>
+    <li><a href="#fills">Fill Detection</a></li>
+    <li><a href="#orderbook">Orderbook Data</a></li>
+    <li><a href="#balance">Balance Management</a></li>
+    <li><a href="#errors">Error Recovery</a></li>
+    <li><a href="#amm">AMM Integration</a></li>
+    <li><a href="#prototype">Testnet Prototype</a></li>
+  </ol>
 </div>
 
 <div class="container">
@@ -433,8 +367,7 @@
 <!-- 1 -->
 <section id="arch">
   <div class="section-header">
-    <div class="section-number">1</div>
-    <h2>System Architecture</h2>
+    <h2>1. System Architecture</h2>
   </div>
   <span class="ref-link">Full document: Section 1 - Executive Summary</span>
 
@@ -473,10 +406,10 @@ flowchart TD
     RPC -- "PENDING / SUCCESS / FAILED" --> EXCH
     HOR -- "orderbook, transactions, balances" --> EXCH
 
-    classDef hbot fill:#F97316,stroke:#C2410C,color:#fff
-    classDef stellar fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef horizon fill:#1E3A5F,stroke:#3B82F6,color:#fff
-    classDef user fill:#7C3AED,stroke:#5B21B6,color:#fff
+    classDef hbot fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef stellar fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef horizon fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef user fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
 
     class STRAT,EXCH,OBT,UST,CHP hbot
     class RPC stellar
@@ -493,8 +426,7 @@ flowchart TD
 <!-- 2 -->
 <section id="tx">
   <div class="section-header">
-    <div class="section-number">2</div>
-    <h2>Transaction Submission Flow</h2>
+    <h2>2. Transaction Submission Flow</h2>
   </div>
   <span class="ref-link">Full document: Section 4.1 - Stellar RPC, The Write Path</span>
 
@@ -531,8 +463,7 @@ sequenceDiagram
 <!-- 3 -->
 <section id="channels">
   <div class="section-header">
-    <div class="section-number">3</div>
-    <h2>Channel Account Architecture</h2>
+    <h2>3. Channel Account Architecture</h2>
   </div>
   <span class="ref-link">Full document: Section 5 - Channel Account Architecture (5.1-5.4)</span>
 
@@ -556,11 +487,11 @@ flowchart TD
     I -- "TX_INSUFF_FEE" --> K([FeeError])
     K -- "re-fetch /fee_stats, rebuild" --> G
 
-    classDef normal fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef ok fill:#16A34A,stroke:#15803D,color:#fff
-    classDef err fill:#DC2626,stroke:#B91C1C,color:#fff
-    classDef warn fill:#D97706,stroke:#B45309,color:#fff
-    classDef start fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef normal fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef ok fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef err fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
+    classDef warn fill:#fff8c5,stroke:#9a6700,color:#1a1a1a
+    classDef start fill:#eef1f5,stroke:#656d76,color:#1a1a1a
 
     class A,C,D,G,H,I start
     class B,J,K normal
@@ -582,8 +513,7 @@ flowchart TD
 <!-- 4 -->
 <section id="orders">
   <div class="section-header">
-    <div class="section-number">4</div>
-    <h2>Two-Phase Order ID and Offer Lifecycle</h2>
+    <h2>4. Two-Phase Order ID and Offer Lifecycle</h2>
   </div>
   <span class="ref-link">Full document: Section 6 - Order Placement (6.1-6.4)</span>
 
@@ -626,8 +556,7 @@ BUY order - ManageBuyOffer(selling=USDC to buy XLM):
 <!-- 5 -->
 <section id="fills">
   <div class="section-header">
-    <div class="section-number">5</div>
-    <h2>Fill Detection and XDR Parsing</h2>
+    <h2>5. Fill Detection and XDR Parsing</h2>
   </div>
   <span class="ref-link">Full document: Section 7 - Fill Detection and User Stream (7.1-7.3)</span>
 
@@ -656,11 +585,11 @@ flowchart TD
     FOUND -- "no" --> IGN
     STALE --> CATCHUP --> RESUME
 
-    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef orange fill:#F97316,stroke:#EA580C,color:#fff
-    classDef green fill:#16A34A,stroke:#15803D,color:#fff
-    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
-    classDef err fill:#DC2626,stroke:#B91C1C,color:#fff
+    classDef blue fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef orange fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef green fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef dark fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef err fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
 
     class SSE,PARSE dark
     class OUR,FOUND orange
@@ -703,8 +632,7 @@ BUY order (selling=USDC):
 <!-- 6 -->
 <section id="orderbook">
   <div class="section-header">
-    <div class="section-number">6</div>
-    <h2>Orderbook Data</h2>
+    <h2>6. Orderbook Data</h2>
   </div>
   <span class="ref-link">Full document: Section 4.2 - Horizon, The Read Path</span>
 
@@ -729,8 +657,7 @@ BUY order (selling=USDC):
 <!-- 7 -->
 <section id="balance">
   <div class="section-header">
-    <div class="section-number">7</div>
-    <h2>Balance Management</h2>
+    <h2>7. Balance Management</h2>
   </div>
   <span class="ref-link">Full document: Section 8 - Balance Management</span>
 
@@ -749,8 +676,7 @@ available_USDC = total_USDC - usdc.selling_liabilities</pre>
 <!-- 8 -->
 <section id="errors">
   <div class="section-header">
-    <div class="section-number">8</div>
-    <h2>Error Recovery</h2>
+    <h2>8. Error Recovery</h2>
   </div>
   <span class="ref-link">Full document: Section 9 - Error Handling</span>
 
@@ -793,11 +719,11 @@ flowchart TD
     PS -- "FAILED" --> FAIL
     PS -- "timeout" --> TIME
 
-    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef green fill:#16A34A,stroke:#15803D,color:#fff
-    classDef red fill:#DC2626,stroke:#B91C1C,color:#fff
-    classDef orange fill:#D97706,stroke:#B45309,color:#fff
-    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef blue fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef green fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef red fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
+    classDef orange fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef dark fill:#eef1f5,stroke:#656d76,color:#1a1a1a
 
     class PEND,POLL,ASEQ,AFEE blue
     class SUC green
@@ -813,8 +739,7 @@ flowchart TD
 <!-- 9 -->
 <section id="amm">
   <div class="section-header">
-    <div class="section-number">9</div>
-    <h2>AMM Integration (Phase 2)</h2>
+    <h2>9. AMM Integration (Phase 2)</h2>
   </div>
   <span class="ref-link">Full document: Section 11 - AMM Integration</span>
 
@@ -846,10 +771,10 @@ flowchart LR
     CMP -- "SDEX better" --> GS
     CMP -- "AMM better" --> GA
 
-    classDef p1 fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef p2 fill:#7C3AED,stroke:#5B21B6,color:#fff
-    classDef rt fill:#F97316,stroke:#EA580C,color:#fff
-    classDef res fill:#16A34A,stroke:#15803D,color:#fff
+    classDef p1 fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef p2 fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef rt fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef res fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
 
     class SDEX p1
     class CLP,SAM,RES p2
@@ -873,8 +798,7 @@ flowchart LR
 <!-- 10 -->
 <section id="prototype">
   <div class="section-header">
-    <div class="section-number">10</div>
-    <h2>Testnet Prototype</h2>
+    <h2>10. Testnet Prototype</h2>
   </div>
 
   <p>A standalone Python proof-of-concept validates the architectural patterns described above. It executes 13 on-chain testnet transactions across three independent accounts (master, taker, issuer) demonstrating the full SDEX trade lifecycle.</p>

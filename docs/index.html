@@ -6,213 +6,166 @@
   <title>Stellar SDEX Hummingbot Connector - Technical Architecture</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
-    :root {
-      --stellar-blue: #0096D6;
-      --stellar-dark: #0A1628;
-      --stellar-mid: #1E3A5F;
-      --hbot-orange: #F97316;
-      --success: #16A34A;
-      --error: #DC2626;
-      --warning: #D97706;
-      --bg: #F8FAFC;
-      --card: #FFFFFF;
-      --border: #E2E8F0;
-      --text: #1E293B;
-      --text-light: #64748B;
-      --code-bg: #0F172A;
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
       line-height: 1.75;
-      font-size: 15px;
+      font-size: 16px;
     }
 
-    .cover {
-      background: var(--stellar-dark);
-      color: white;
-      padding: 72px 60px 56px;
+    .doc-header {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 48px 40px 32px;
+      border-bottom: 1px solid #d0d7de;
     }
 
-    .cover-badge {
-      display: inline-block;
-      background: #1E3A5F;
-      border: 1px solid #334E6B;
-      border-radius: 20px;
-      padding: 4px 14px;
-      font-size: 11px;
-      letter-spacing: 1.2px;
-      text-transform: uppercase;
-      margin-bottom: 18px;
-      color: #CBD5E1;
-    }
-
-    .cover h1 {
-      font-size: 34px;
+    .doc-header h1 {
+      font-size: 28px;
       font-weight: 700;
-      line-height: 1.2;
-      margin-bottom: 10px;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+      line-height: 1.3;
     }
 
-    .cover-sub {
-      color: #CBD5E1;
+    .doc-header .doc-subtitle {
       font-size: 15px;
-      margin-top: 6px;
+      color: #656d76;
+      margin-bottom: 20px;
     }
 
-    .cover-meta {
-      display: flex;
-      gap: 36px;
-      margin-top: 32px;
-      flex-wrap: wrap;
-    }
-
-    .cover-meta-item {
-      display: flex;
-      flex-direction: column;
-      gap: 3px;
-    }
-
-    .cover-meta-label {
-      font-size: 10px;
-      color: #94A3B8;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .cover-meta-value {
+    .doc-meta {
       font-size: 14px;
-      font-weight: 500;
+      color: #1a1a1a;
+      line-height: 1.8;
+    }
+
+    .doc-meta dt {
+      display: inline;
+      font-weight: 600;
+      color: #1a1a1a;
+    }
+
+    .doc-meta dd {
+      display: inline;
+      margin-left: 0;
+      margin-right: 24px;
+      color: #333;
     }
 
     .toc {
-      background: var(--card);
-      border-bottom: 1px solid var(--border);
-      padding: 18px 60px;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 24px 40px;
+      border-bottom: 1px solid #d0d7de;
     }
 
     .toc-label {
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--text-light);
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
       margin-bottom: 10px;
     }
 
-    .toc-links {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
+    .toc ol {
+      margin: 0;
+      padding-left: 20px;
+      columns: 2;
+      column-gap: 32px;
     }
 
-    .toc-links a {
-      font-size: 13px;
-      color: var(--stellar-blue);
+    .toc li {
+      font-size: 14px;
+      margin-bottom: 4px;
+      color: #1a1a1a;
+    }
+
+    .toc a {
+      color: #0969da;
       text-decoration: none;
-      background: #EFF6FF;
-      padding: 4px 12px;
-      border-radius: 20px;
-      border: 1px solid #BFDBFE;
-      transition: all 0.15s;
     }
 
-    .toc-links a:hover {
-      background: var(--stellar-blue);
-      color: white;
+    .toc a:hover {
+      text-decoration: underline;
     }
 
     .container {
-      max-width: 960px;
+      max-width: 800px;
       margin: 0 auto;
-      padding: 52px 40px;
+      padding: 40px 40px;
     }
 
     section {
-      margin-bottom: 60px;
+      margin-bottom: 48px;
     }
 
     .section-header {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 22px;
-      padding-bottom: 14px;
-      border-bottom: 2px solid var(--border);
-    }
-
-    .section-number {
-      background: var(--stellar-blue);
-      color: white;
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 13px;
-      font-weight: 700;
-      flex-shrink: 0;
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #d0d7de;
     }
 
     .section-header h2 {
-      font-size: 21px;
+      font-size: 20px;
       font-weight: 700;
-      color: var(--stellar-dark);
+      color: #1a1a1a;
     }
 
     h3 {
       font-size: 16px;
       font-weight: 600;
-      color: var(--stellar-dark);
-      margin: 28px 0 10px;
+      color: #1a1a1a;
+      margin: 24px 0 10px;
     }
 
     h4 {
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
-      color: var(--text-light);
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      margin: 22px 0 8px;
+      color: #1a1a1a;
+      margin: 20px 0 8px;
     }
 
     p {
       margin-bottom: 14px;
-      color: #334155;
+      color: #333;
+    }
+
+    a {
+      color: #0969da;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     .callout {
-      border-radius: 8px;
       padding: 14px 18px;
       margin: 18px 0;
       border-left: 3px solid;
       font-size: 14px;
+      border-radius: 0;
     }
 
-    .callout p { margin: 0; }
+    .callout p { margin: 0; color: #333; }
 
     .callout-info {
-      background: #EFF6FF;
-      border-color: var(--stellar-blue);
-      color: #1D4ED8;
+      background: #f6f8fa;
+      border-color: #0969da;
     }
 
     .callout-warning {
-      background: #FFFBEB;
-      border-color: var(--warning);
-      color: #92400E;
+      background: #fff8c5;
+      border-color: #9a6700;
     }
 
     .table-wrap {
       overflow-x: auto;
       margin: 18px 0;
-      border-radius: 10px;
-      border: 1px solid var(--border);
-      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      border: 1px solid #d0d7de;
     }
 
     table {
@@ -222,53 +175,52 @@
     }
 
     thead th {
-      background: var(--stellar-dark);
-      color: white;
-      padding: 11px 16px;
+      background: #f6f8fa;
+      color: #1a1a1a;
+      padding: 10px 14px;
       text-align: left;
-      font-size: 11px;
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      border-bottom: 1px solid #d0d7de;
     }
 
-    tbody tr:nth-child(even) { background: #F8FAFC; }
     tbody tr { background: white; }
 
     tbody td {
-      padding: 11px 16px;
-      border-top: 1px solid var(--border);
+      padding: 10px 14px;
+      border-top: 1px solid #d0d7de;
       vertical-align: top;
-      color: #334155;
-      font-size: 13.5px;
+      color: #333;
+      font-size: 14px;
     }
 
     tbody td:first-child {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 12px;
-      color: #7C3AED;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      color: #1a1a1a;
       white-space: nowrap;
     }
 
     pre {
-      background: var(--code-bg);
-      color: #E2E8F0;
-      padding: 18px 22px;
-      border-radius: 10px;
+      background: #f6f8fa;
+      color: #1a1a1a;
+      padding: 16px 20px;
+      border: 1px solid #d0d7de;
       overflow-x: auto;
       font-size: 13px;
       line-height: 1.65;
       margin: 14px 0;
-      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
     }
 
     code {
-      font-family: 'Monaco', 'Menlo', monospace;
-      font-size: 12px;
-      background: #F1F5F9;
-      color: #7C3AED;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      background: #f6f8fa;
+      color: #1a1a1a;
       padding: 2px 6px;
-      border-radius: 4px;
+      border-radius: 3px;
+      border: 1px solid #d0d7de;
     }
 
     pre code {
@@ -276,37 +228,22 @@
       color: inherit;
       padding: 0;
       font-size: inherit;
+      border: none;
     }
 
     .diagram-wrap {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 12px;
+      background: #ffffff;
+      border: 1px solid #d0d7de;
       padding: 24px;
-      margin: 22px 0;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      margin: 18px 0;
       overflow-x: auto;
     }
 
     .diagram-label {
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1.2px;
-      color: var(--text-light);
-      margin-bottom: 18px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .diagram-label::before {
-      content: '';
-      display: inline-block;
-      width: 7px;
-      height: 7px;
-      background: var(--stellar-blue);
-      border-radius: 50%;
+      color: #656d76;
+      margin-bottom: 16px;
     }
 
     .mermaid {
@@ -319,98 +256,112 @@
       display: grid;
       grid-template-columns: 1fr 2fr;
       gap: 0;
-      border: 1px solid var(--border);
-      border-radius: 10px;
+      border: 1px solid #d0d7de;
       overflow: hidden;
       margin: 18px 0;
     }
 
     .decision-header {
-      background: var(--stellar-dark);
-      color: white;
-      padding: 10px 16px;
-      font-size: 11px;
+      background: #f6f8fa;
+      color: #1a1a1a;
+      padding: 10px 14px;
+      font-size: 13px;
       font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      border-right: 1px solid #334E6B;
+      border-bottom: 1px solid #d0d7de;
+      border-right: 1px solid #d0d7de;
     }
 
     .decision-header:last-child { border-right: none; }
 
     .decision-row-label {
-      background: #F8FAFC;
-      padding: 12px 16px;
-      font-family: monospace;
-      font-size: 12px;
-      color: #7C3AED;
-      border-top: 1px solid var(--border);
-      border-right: 1px solid var(--border);
+      background: #f6f8fa;
+      padding: 10px 14px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
+      font-size: 13px;
+      color: #1a1a1a;
+      border-top: 1px solid #d0d7de;
+      border-right: 1px solid #d0d7de;
       font-weight: 600;
     }
 
     .decision-row-value {
-      padding: 12px 16px;
-      font-size: 13.5px;
-      border-top: 1px solid var(--border);
-      color: #334155;
+      padding: 10px 14px;
+      font-size: 14px;
+      border-top: 1px solid #d0d7de;
+      color: #333;
     }
 
     .file-tree {
-      background: var(--code-bg);
-      border-radius: 10px;
-      padding: 20px 24px;
-      font-family: 'Monaco', 'Menlo', monospace;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      padding: 16px 20px;
+      font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
       font-size: 13px;
       line-height: 2.1;
-      color: #94A3B8;
+      color: #1a1a1a;
     }
 
-    .file-tree .dir { color: #93C5FD; }
-    .file-tree .file-main { color: #86EFAC; }
-    .file-tree .comment { color: #4B5563; font-size: 12px; }
+    .file-tree .dir { color: #0969da; font-weight: 600; }
+    .file-tree .file-main { color: #1a7f37; font-weight: 600; }
+    .file-tree .comment { color: #656d76; font-size: 12px; }
 
-    .badge {
+    .ref-link {
       display: inline-block;
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      font-weight: 600;
+      font-size: 13px;
+      color: #656d76;
+      margin-bottom: 12px;
     }
 
-    .badge-green { background: #DCFCE7; color: #15803D; }
-    .badge-orange { background: #FFEDD5; color: #C2410C; }
-    .badge-red { background: #FEE2E2; color: #B91C1C; }
+    .evidence-link {
+      display: inline-block;
+      font-size: 13px;
+      color: #0969da;
+      text-decoration: none;
+      margin-top: 8px;
+    }
+
+    .evidence-link:hover {
+      text-decoration: underline;
+    }
 
     .phase-note {
-      background: #0A1628;
-      color: white;
-      border-radius: 10px;
-      padding: 18px 22px;
+      background: #f6f8fa;
+      border: 1px solid #d0d7de;
+      border-left: 3px solid #656d76;
+      padding: 14px 18px;
       margin: 18px 0;
     }
 
     .phase-note h4 {
-      color: #93C5FD;
+      color: #1a1a1a;
       margin-top: 0;
-      text-transform: none;
       font-size: 14px;
-      letter-spacing: 0;
       margin-bottom: 6px;
     }
 
-    .phase-note p { color: #CBD5E1; margin: 0; font-size: 14px; }
+    .phase-note p { color: #333; margin: 0; font-size: 14px; }
 
-    footer {
-      background: var(--stellar-dark);
-      color: #94A3B8;
-      text-align: center;
-      padding: 22px;
-      font-size: 13px;
-      margin-top: 60px;
+    ul {
+      margin: 8px 0 14px 24px;
+      color: #333;
     }
 
-    footer strong { color: #CBD5E1; }
+    li {
+      margin-bottom: 4px;
+    }
+
+    footer {
+      max-width: 800px;
+      margin: 48px auto 0;
+      padding: 24px 40px;
+      border-top: 1px solid #d0d7de;
+      text-align: center;
+      font-size: 13px;
+      color: #656d76;
+    }
+
+    footer a { color: #0969da; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -420,86 +371,70 @@
     startOnLoad: true,
     theme: 'base',
     themeVariables: {
-      primaryColor: '#0096D6',
-      primaryTextColor: '#1E293B',
-      primaryBorderColor: '#0074A8',
-      lineColor: '#64748B',
-      secondaryColor: '#1E3A5F',
-      tertiaryColor: '#F1F5F9',
+      primaryColor: '#d0d7de',
+      primaryTextColor: '#1a1a1a',
+      primaryBorderColor: '#656d76',
+      lineColor: '#656d76',
+      secondaryColor: '#eef1f5',
+      tertiaryColor: '#f6f8fa',
       background: '#ffffff',
-      fontFamily: 'Inter, -apple-system, sans-serif',
+      fontFamily: '-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica, Arial, sans-serif',
       fontSize: '14px',
-      edgeLabelBackground: '#F8FAFC',
-      signalColor: '#1E293B',
-      signalTextColor: '#1E293B',
-      actorBkg: '#0096D6',
-      actorTextColor: '#ffffff',
-      actorBorder: '#0074A8',
-      actorLineColor: '#64748B',
-      noteBkgColor: '#EFF6FF',
-      noteTextColor: '#1E293B',
-      noteBorderColor: '#BFDBFE',
-      activationBkgColor: '#EFF6FF',
-      activationBorderColor: '#0096D6',
+      edgeLabelBackground: '#ffffff',
+      signalColor: '#1a1a1a',
+      signalTextColor: '#1a1a1a',
+      actorBkg: '#f6f8fa',
+      actorTextColor: '#1a1a1a',
+      actorBorder: '#656d76',
+      actorLineColor: '#656d76',
+      noteBkgColor: '#f6f8fa',
+      noteTextColor: '#1a1a1a',
+      noteBorderColor: '#d0d7de',
+      activationBkgColor: '#f6f8fa',
+      activationBorderColor: '#656d76',
       sequenceNumberColor: '#ffffff',
-      labelBoxBkgColor: '#EFF6FF',
-      labelBoxBorderColor: '#BFDBFE',
-      labelTextColor: '#1E293B',
-      loopTextColor: '#1E293B',
+      labelBoxBkgColor: '#f6f8fa',
+      labelBoxBorderColor: '#d0d7de',
+      labelTextColor: '#1a1a1a',
+      loopTextColor: '#1a1a1a',
       messageFontSize: '13px',
-      messageTextColor: '#1E293B'
+      messageTextColor: '#1a1a1a'
     },
     flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: true },
     sequence: { useMaxWidth: true, mirrorActors: false, boxMargin: 10, messageFontSize: 13, noteFontSize: 13, actorFontSize: 14 }
   });
 </script>
 
-<div class="cover">
-  <div class="cover-badge">Technical Architecture Document</div>
+<div class="doc-header">
   <h1>Stellar SDEX Hummingbot Connector</h1>
-  <p class="cover-sub">A complete reference for how this connector is built, why each decision was made, and how everything fits together.</p>
-  <div class="cover-meta">
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Version</span>
-      <span class="cover-meta-value">2.0</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Date</span>
-      <span class="cover-meta-value">March 14, 2026</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Authors</span>
-      <span class="cover-meta-value">Tharun Ekambaram &amp; Daniel Zilper</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Protocol</span>
-      <span class="cover-meta-value">Stellar Protocol 23</span>
-    </div>
-    <div class="cover-meta-item">
-      <span class="cover-meta-label">Budget</span>
-      <span class="cover-meta-value">$114,900</span>
-    </div>
-  </div>
+  <p class="doc-subtitle">Technical Architecture Document. A complete reference for how this connector is built, why each decision was made, and how everything fits together.</p>
+  <dl class="doc-meta">
+    <dt>Version:</dt> <dd>2.0</dd>
+    <dt>Date:</dt> <dd>March 14, 2026</dd>
+    <dt>Authors:</dt> <dd>Tharun Ekambaram &amp; Daniel Zilper</dd>
+    <dt>Protocol:</dt> <dd>Stellar Protocol 23</dd>
+    <dt>Budget:</dt> <dd>$114,900</dd>
+  </dl>
 </div>
 
 <div class="toc">
   <div class="toc-label">Contents</div>
-  <div class="toc-links">
-    <a href="#overview">1. Overview</a>
-    <a href="#stack">2. Technology Stack</a>
-    <a href="#files">3. File Structure</a>
-    <a href="#transport">4. Transport Layer</a>
-    <a href="#channels">5. Channel Accounts</a>
-    <a href="#placement">6. Order Placement</a>
-    <a href="#fills">7. Fill Detection</a>
-    <a href="#balance">8. Balance Management</a>
-    <a href="#errors">9. Error Handling</a>
-    <a href="#startup">10. Network Validation</a>
-    <a href="#amm">11. AMM Integration</a>
-    <a href="#hummingbot">12. Hummingbot Contract</a>
-    <a href="#security">13. Security</a>
-    <a href="#decisions">14. Design Decisions</a>
-  </div>
+  <ol>
+    <li><a href="#overview">Executive Summary</a></li>
+    <li><a href="#stack">Technology Stack</a></li>
+    <li><a href="#files">File Structure</a></li>
+    <li><a href="#transport">Transport Layer</a></li>
+    <li><a href="#channels">Channel Account Architecture</a></li>
+    <li><a href="#placement">Order Placement</a></li>
+    <li><a href="#fills">Fill Detection and User Stream</a></li>
+    <li><a href="#balance">Balance Management</a></li>
+    <li><a href="#errors">Error Handling</a></li>
+    <li><a href="#startup">Network Validation at Startup</a></li>
+    <li><a href="#amm">AMM Integration - Phase 2</a></li>
+    <li><a href="#hummingbot">Hummingbot Integration Contract</a></li>
+    <li><a href="#security">Security</a></li>
+    <li><a href="#decisions">Key Design Decisions</a></li>
+  </ol>
 </div>
 
 <div class="container">
@@ -507,8 +442,7 @@
 <!-- 1. Overview -->
 <section id="overview">
   <div class="section-header">
-    <div class="section-number">1</div>
-    <h2>Executive Summary</h2>
+    <h2>1. Executive Summary</h2>
   </div>
 
   <p>This connector integrates the Stellar DEX with Hummingbot as a direct Python <code>ExchangePyBase</code> subclass -the same pattern the XRPL connector uses. It runs inside the Hummingbot process. There is no external server, no extra Docker container, and no middleware. That setup is required for the connector to be officially merged into the Hummingbot repository and maintained alongside everything else in the codebase.</p>
@@ -563,10 +497,10 @@ flowchart TD
     RPC -- "PENDING / SUCCESS / FAILED" --> EXCH
     HOR -- "orderbook · transactions · balances" --> EXCH
 
-    classDef hbot fill:#F97316,stroke:#C2410C,color:#fff
-    classDef stellar fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef horizon fill:#1E3A5F,stroke:#3B82F6,color:#fff
-    classDef user fill:#7C3AED,stroke:#5B21B6,color:#fff
+    classDef hbot fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef stellar fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef horizon fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef user fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
 
     class STRAT,EXCH,OBT,UST,CHP hbot
     class RPC stellar
@@ -579,8 +513,7 @@ flowchart TD
 <!-- 2. Stack -->
 <section id="stack">
   <div class="section-header">
-    <div class="section-number">2</div>
-    <h2>Technology Stack</h2>
+    <h2>2. Technology Stack</h2>
   </div>
 
   <p>The dependency surface is intentionally small. The <code>stellar-sdk</code> handles XDR encoding and transaction construction. All network calls use <code>aiohttp</code> directly with persistent sessions -not the SDK's built-in HTTP client. This avoids async compatibility issues between the SDK and Hummingbot's event loop, and gives us full control over connection pooling.</p>
@@ -608,8 +541,7 @@ flowchart TD
 <!-- 3. Files -->
 <section id="files">
   <div class="section-header">
-    <div class="section-number">3</div>
-    <h2>File Structure</h2>
+    <h2>3. File Structure</h2>
   </div>
 
   <p>Every file has a single job. The main connector in <code>stellar_exchange.py</code> implements the abstract methods Hummingbot requires and orchestrates everything else.</p>
@@ -634,8 +566,7 @@ flowchart TD
 <!-- 4. Transport -->
 <section id="transport">
   <div class="section-header">
-    <div class="section-number">4</div>
-    <h2>Transport Layer</h2>
+    <h2>4. Transport Layer</h2>
   </div>
 
   <p>The connector uses two separate transport mechanisms -Stellar RPC for writing, Horizon for reading. This is not a workaround. It reflects what each API is actually built to do.</p>
@@ -706,9 +637,9 @@ flowchart LR
     TXE --> USS
     BAL --> BALT
 
-    classDef ledger fill:#1E3A5F,stroke:#3B82F6,color:#fff
-    classDef horizon fill:#0F172A,stroke:#0096D6,color:#94A3B8
-    classDef connector fill:#F97316,stroke:#EA580C,color:#fff
+    classDef ledger fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef horizon fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef connector fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
 
     class OE,TX ledger
     class OB,TXE,BAL horizon
@@ -735,8 +666,7 @@ flowchart LR
 <!-- 5. Channels -->
 <section id="channels">
   <div class="section-header">
-    <div class="section-number">5</div>
-    <h2>Channel Account Architecture</h2>
+    <h2>5. Channel Account Architecture</h2>
   </div>
 
   <p>Stellar allows exactly one transaction per account per ledger. A market maker refreshing a three-level spread needs to cancel six orders and place six new ones simultaneously. From a single account, those twelve transactions would take roughly sixty seconds. With a channel pool, they happen in one ledger close.</p>
@@ -765,11 +695,11 @@ flowchart TD
     I -- "TX_INSUFF_FEE" --> K([FeeError])
     K -- "re-fetch /fee_stats, rebuild" --> G
 
-    classDef normal fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef ok fill:#16A34A,stroke:#15803D,color:#fff
-    classDef err fill:#DC2626,stroke:#B91C1C,color:#fff
-    classDef warn fill:#D97706,stroke:#B45309,color:#fff
-    classDef start fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef normal fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef ok fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef err fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
+    classDef warn fill:#fff8c5,stroke:#9a6700,color:#1a1a1a
+    classDef start fill:#eef1f5,stroke:#656d76,color:#1a1a1a
 
     class A,C,D,G,H,I start
     class B,J,K normal
@@ -806,11 +736,11 @@ def invalidate_sequence(self):
     <table>
       <thead><tr><th>Event</th><th>Sequence Consumed?</th><th>Action</th></tr></thead>
       <tbody>
-        <tr><td>sendTransaction returns PENDING</td><td><span class="badge badge-orange">Not yet</span></td><td>Advance local counter -will be consumed when it lands</td></tr>
-        <tr><td>getTransaction returns SUCCESS</td><td><span class="badge badge-green">Yes</span></td><td>Counter already advanced</td></tr>
-        <tr><td>getTransaction returns FAILED</td><td><span class="badge badge-green">Yes</span></td><td>TX landed and failed -sequence still consumed</td></tr>
-        <tr><td>sendTransaction ERROR TX_BAD_SEQ</td><td><span class="badge badge-red">No</span></td><td>Invalidate counter, re-fetch from Horizon, retry</td></tr>
-        <tr><td>sendTransaction ERROR TX_INSUFF_FEE</td><td><span class="badge badge-red">No</span></td><td>Do not advance -re-fetch /fee_stats, rebuild, retry</td></tr>
+        <tr><td>sendTransaction returns PENDING</td><td>Not yet</td><td>Advance local counter -will be consumed when it lands</td></tr>
+        <tr><td>getTransaction returns SUCCESS</td><td>Yes</td><td>Counter already advanced</td></tr>
+        <tr><td>getTransaction returns FAILED</td><td>Yes</td><td>TX landed and failed -sequence still consumed</td></tr>
+        <tr><td>sendTransaction ERROR TX_BAD_SEQ</td><td>No</td><td>Invalidate counter, re-fetch from Horizon, retry</td></tr>
+        <tr><td>sendTransaction ERROR TX_INSUFF_FEE</td><td>No</td><td>Do not advance -re-fetch /fee_stats, rebuild, retry</td></tr>
       </tbody>
     </table>
   </div>
@@ -840,10 +770,10 @@ flowchart TD
     ANY -- "No" --> SLEEP
     ANY -- "Yes" --> BUILD --> SIGN --> SUB --> CONF --> SLEEP
 
-    classDef action fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef decision fill:#F97316,stroke:#EA580C,color:#fff
-    classDef terminal fill:#1E3A5F,stroke:#3B82F6,color:#fff
-    classDef ok fill:#16A34A,stroke:#15803D,color:#fff
+    classDef action fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef decision fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef terminal fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef ok fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
 
     class BUILD,SIGN,SUB,CONF action
     class C,ANY decision
@@ -856,8 +786,7 @@ flowchart TD
 <!-- 6. Order Placement -->
 <section id="placement">
   <div class="section-header">
-    <div class="section-number">6</div>
-    <h2>Order Placement</h2>
+    <h2>6. Order Placement</h2>
   </div>
 
   <h3>6.1 Operation Mapping</h3>
@@ -938,10 +867,10 @@ flowchart TD
     E -- "updated" --> UP --> OPEN
     E -- "deleted" --> DEL --> CLAIMS --> FILL
 
-    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef orange fill:#F97316,stroke:#EA580C,color:#fff
-    classDef green fill:#16A34A,stroke:#15803D,color:#fff
-    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef blue fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef orange fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef green fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef dark fill:#eef1f5,stroke:#656d76,color:#1a1a1a
 
     class P,E dark
     class CR,UP,OPEN blue
@@ -954,8 +883,7 @@ flowchart TD
 <!-- 7. Fills -->
 <section id="fills">
   <div class="section-header">
-    <div class="section-number">7</div>
-    <h2>Fill Detection and User Stream</h2>
+    <h2>7. Fill Detection and User Stream</h2>
   </div>
 
   <p>Fill detection runs through Horizon's account transaction stream. It only delivers transactions involving the main trading account. The connector saves its cursor position and resumes from exactly that point after any disconnection -fills that happen during a gap are never lost.</p>
@@ -983,11 +911,11 @@ flowchart TD
     FOUND -- "no" --> IGN
     STALE --> CATCHUP --> RESUME
 
-    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef orange fill:#F97316,stroke:#EA580C,color:#fff
-    classDef green fill:#16A34A,stroke:#15803D,color:#fff
-    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
-    classDef err fill:#DC2626,stroke:#B91C1C,color:#fff
+    classDef blue fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef orange fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef green fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef dark fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef err fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
 
     class SSE,PARSE dark
     class OUR,FOUND orange
@@ -1039,8 +967,7 @@ BUY order (selling=USDC):
 <!-- 8. Balance -->
 <section id="balance">
   <div class="section-header">
-    <div class="section-number">8</div>
-    <h2>Balance Management</h2>
+    <h2>8. Balance Management</h2>
   </div>
 
   <p>Stellar locks XLM for every subentry on an account. Getting the reserve calculation wrong means the bot tries to trade XLM it does not actually have available, which produces failed transactions.</p>
@@ -1066,8 +993,7 @@ available_USDC = total_USDC - usdc.selling_liabilities</pre>
 <!-- 9. Errors -->
 <section id="errors">
   <div class="section-header">
-    <div class="section-number">9</div>
-    <h2>Error Handling</h2>
+    <h2>9. Error Handling</h2>
   </div>
 
   <p>All error codes come from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code> -typed Python enums. No string comparisons.</p>
@@ -1111,11 +1037,11 @@ flowchart TD
     PS -- "FAILED" --> FAIL
     PS -- "timeout" --> TIME
 
-    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef green fill:#16A34A,stroke:#15803D,color:#fff
-    classDef red fill:#DC2626,stroke:#B91C1C,color:#fff
-    classDef orange fill:#D97706,stroke:#B45309,color:#fff
-    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef blue fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef green fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef red fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
+    classDef orange fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef dark fill:#eef1f5,stroke:#656d76,color:#1a1a1a
 
     class PEND,POLL,ASEQ,AFEE blue
     class SUC green
@@ -1155,8 +1081,7 @@ flowchart TD
 <!-- 10. Startup -->
 <section id="startup">
   <div class="section-header">
-    <div class="section-number">10</div>
-    <h2>Network Validation at Startup</h2>
+    <h2>10. Network Validation at Startup</h2>
   </div>
 
   <p>Before accepting any orders, the connector validates that the RPC endpoint and Horizon endpoint are on the same network. The most common configuration mistake -pointing one at Testnet and the other at Mainnet -is caught here before a single trade is attempted.</p>
@@ -1185,10 +1110,10 @@ flowchart TD
     H2 -- "no" --> H3
     H2 -- "yes" --> S1 --> S2 --> S3 --> S4 --> S5 --> DONE
 
-    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef red fill:#DC2626,stroke:#B91C1C,color:#fff
-    classDef green fill:#16A34A,stroke:#15803D,color:#fff
-    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef blue fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef red fill:#ffebe9,stroke:#cf222e,color:#1a1a1a
+    classDef green fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
+    classDef dark fill:#eef1f5,stroke:#656d76,color:#1a1a1a
 
     class R1,H1,S1,S2,S3,S4,S5 blue
     class R3,H3 red
@@ -1201,8 +1126,7 @@ flowchart TD
 <!-- 11. AMM -->
 <section id="amm">
   <div class="section-header">
-    <div class="section-number">11</div>
-    <h2>AMM Integration -Phase 2</h2>
+    <h2>11. AMM Integration - Phase 2</h2>
   </div>
 
   <div class="phase-note">
@@ -1238,10 +1162,10 @@ flowchart LR
     CMP -- "SDEX better" --> GS
     CMP -- "AMM better" --> GA
 
-    classDef p1 fill:#0096D6,stroke:#0074A8,color:#fff
-    classDef p2 fill:#7C3AED,stroke:#5B21B6,color:#fff
-    classDef rt fill:#F97316,stroke:#EA580C,color:#fff
-    classDef res fill:#16A34A,stroke:#15803D,color:#fff
+    classDef p1 fill:#ddf4ff,stroke:#0969da,color:#1a1a1a
+    classDef p2 fill:#f6f8fa,stroke:#656d76,color:#1a1a1a
+    classDef rt fill:#eef1f5,stroke:#656d76,color:#1a1a1a
+    classDef res fill:#dafbe1,stroke:#1a7f37,color:#1a1a1a
 
     class SDEX p1
     class CLP,SAM,RES p2
@@ -1271,8 +1195,7 @@ flowchart LR
 <!-- 12. Hummingbot contract -->
 <section id="hummingbot">
   <div class="section-header">
-    <div class="section-number">12</div>
-    <h2>Hummingbot Integration Contract</h2>
+    <h2>12. Hummingbot Integration Contract</h2>
   </div>
 
   <p>Every abstract method from <code>ExchangePyBase</code> that would normally call a centralized exchange REST API is reimplemented against Horizon and Stellar RPC.</p>
@@ -1304,8 +1227,7 @@ flowchart LR
 <!-- 13. Security -->
 <section id="security">
   <div class="section-header">
-    <div class="section-number">13</div>
-    <h2>Security</h2>
+    <h2>13. Security</h2>
   </div>
 
   <p>The connector inherits Hummingbot's native security model. We do not add separate credential management on top of it.</p>
@@ -1326,8 +1248,7 @@ flowchart LR
 <!-- 14. Decisions -->
 <section id="decisions">
   <div class="section-header">
-    <div class="section-number">14</div>
-    <h2>Key Design Decisions</h2>
+    <h2>14. Key Design Decisions</h2>
   </div>
 
   <h3>Why a direct Python connector and not a Gateway?</h3>
@@ -1346,8 +1267,8 @@ flowchart LR
 </div>
 
 <footer>
-  <strong>Stellar SDEX Hummingbot Connector -Technical Architecture v2.0</strong><br/>
-  Tharun Ekambaram &amp; Daniel Zilper &nbsp;&middot;&nbsp; March 14, 2026 &nbsp;&middot;&nbsp; Protocol 23
+  Stellar SDEX Hummingbot Connector - Technical Architecture v2.0<br/>
+  Tharun Ekambaram &amp; Daniel Zilper | March 14, 2026 | Protocol 23
 </footer>
 
 </body>
