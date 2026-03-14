@@ -40,19 +40,21 @@
     .doc-meta {
       font-size: 14px;
       color: #1a1a1a;
-      line-height: 1.8;
+      display: grid;
+      grid-template-columns: auto 1fr auto 1fr;
+      column-gap: 8px;
+      row-gap: 4px;
+      align-items: baseline;
     }
 
     .doc-meta dt {
-      display: inline;
       font-weight: 600;
       color: #1a1a1a;
+      white-space: nowrap;
     }
 
     .doc-meta dd {
-      display: inline;
       margin-left: 0;
-      margin-right: 24px;
       color: #333;
     }
 
@@ -412,7 +414,7 @@
     <dt>Version:</dt> <dd>2.0</dd>
     <dt>Date:</dt> <dd>March 14, 2026</dd>
     <dt>Authors:</dt> <dd>Tharun Ekambaram &amp; Daniel Zilper</dd>
-    <dt>Protocol:</dt> <dd>Stellar Protocol 23</dd>
+    <dt>Protocol:</dt> <dd>Stellar 23</dd>
     <dt>Budget:</dt> <dd>$114,900</dd>
   </dl>
   <p style="font-size: 14px; margin-top: 12px; color: #656d76;">See also: <a href="consolidated.html">Consolidated Architecture</a> (key diagrams and decisions) | <a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc">Testnet Prototype Repository</a></p>
