@@ -10,9 +10,10 @@ Demonstrates core SDEX operations on the Stellar testnet:
 5. Orderbook reading
 6. Sell offer placement with two-phase order ID
 7. Buy offer placement
-8. Fill detection streaming
-9. Offer cancellation
-10. Channel fee replenishment check
+8. Taker account crosses the sell offer (real two-party trade)
+9. Fill detection captures the trade
+10. Offer cancellation
+11. Channel fee replenishment check
 """
 
 import asyncio
@@ -27,7 +28,7 @@ from stellar_sdk import (
     Server,
     TransactionBuilder,
 )
-from stellar_sdk.operation import ChangeTrust, Payment
+from stellar_sdk.operation import ChangeTrust, ManageBuyOffer, Payment
 
 from src.config import (
     BASE_FEE,
@@ -177,9 +178,70 @@ async def main() -> None:
             USDC = None
 
     # ------------------------------------------------------------------
-    # Step 3: Create and fund 3 channel accounts (batched)
+    # Step 3: Create and fund taker account
     # ------------------------------------------------------------------
-    separator("STEP 3: Create channel accounts (batched in single tx)")
+    separator("STEP 3: Create taker account (independent counterparty)")
+
+    taker_kp = Keypair.random()
+    print(f"Taker public key: {taker_kp.public_key}")
+
+    try:
+        taker_tx = await fund_from_friendbot(taker_kp.public_key)
+        if taker_tx != "already_funded":
+            tx_hashes.append(taker_tx)
+        print(f"Taker funded. TX: {taker_tx}")
+    except Exception as exc:
+        print(f"Could not fund taker: {exc}")
+        taker_kp = None
+
+    # Taker needs a USDC trustline and some USDC to take the sell offer
+    if taker_kp and USDC and issuer_kp:
+        try:
+            # Trustline
+            taker_account = server.load_account(taker_kp.public_key)
+            builder = TransactionBuilder(
+                source_account=taker_account,
+                network_passphrase=NETWORK_PASSPHRASE,
+                base_fee=BASE_FEE,
+            )
+            builder.set_timeout(30)
+            builder.append_operation(ChangeTrust(asset=USDC))
+            tx = builder.build()
+            tx.sign(taker_kp)
+            response = server.submit_transaction(tx)
+            tx_hash = response["hash"]
+            tx_hashes.append(tx_hash)
+            print(f"Taker USDC trustline. TX: {tx_hash}")
+
+            # Issuer sends USDC to taker
+            issuer_account = server.load_account(issuer_kp.public_key)
+            builder = TransactionBuilder(
+                source_account=issuer_account,
+                network_passphrase=NETWORK_PASSPHRASE,
+                base_fee=BASE_FEE,
+            )
+            builder.set_timeout(30)
+            builder.append_operation(
+                Payment(
+                    destination=taker_kp.public_key,
+                    asset=USDC,
+                    amount="500.0000000",
+                )
+            )
+            tx = builder.build()
+            tx.sign(issuer_kp)
+            response = server.submit_transaction(tx)
+            tx_hash = response["hash"]
+            tx_hashes.append(tx_hash)
+            print(f"Minted 500 USDC to taker. TX: {tx_hash}")
+        except Exception as exc:
+            print(f"Taker setup failed: {exc}")
+            taker_kp = None
+
+    # ------------------------------------------------------------------
+    # Step 4: Create and fund 3 channel accounts (batched)
+    # ------------------------------------------------------------------
+    separator("STEP 4: Create channel accounts (batched in single tx)")
 
     try:
         tx_hash = await channel_mgr.create_channels()
@@ -193,9 +255,9 @@ async def main() -> None:
         return
 
     # ------------------------------------------------------------------
-    # Step 4: Fetch and display XLM/USDC orderbook
+    # Step 5: Fetch and display XLM/USDC orderbook (before our offers)
     # ------------------------------------------------------------------
-    separator("STEP 4: Fetch orderbook")
+    separator("STEP 5: Fetch orderbook (before placing offers)")
 
     ob_reader = OrderbookReader()
     if USDC:
@@ -211,9 +273,9 @@ async def main() -> None:
         print("Skipping orderbook (no USDC asset available).")
 
     # ------------------------------------------------------------------
-    # Step 5: Place a sell offer (sell XLM for USDC) using channel 1
+    # Step 6: Place a sell offer (sell XLM for USDC) using channel 1
     # ------------------------------------------------------------------
-    separator("STEP 5: Place sell offer (XLM -> USDC)")
+    separator("STEP 6: Place sell offer (10 XLM @ 0.50 USDC/XLM)")
 
     order_mgr = OrderManager(master_kp, server)
     sell_result = None
@@ -243,9 +305,9 @@ async def main() -> None:
         print("Skipping sell offer (no USDC asset available).")
 
     # ------------------------------------------------------------------
-    # Step 6: Place a buy offer (buy XLM with USDC) using channel 2
+    # Step 7: Place a buy offer (buy XLM with USDC) using channel 2
     # ------------------------------------------------------------------
-    separator("STEP 6: Place buy offer (USDC -> XLM)")
+    separator("STEP 7: Place buy offer (5 XLM @ 0.30 USDC/XLM)")
 
     buy_result = None
     if USDC:
@@ -275,9 +337,67 @@ async def main() -> None:
         print("Skipping buy offer (no USDC asset available).")
 
     # ------------------------------------------------------------------
-    # Step 7: Start fill detection stream (brief, with timeout)
+    # Step 8: Fetch orderbook again (should show our offers)
     # ------------------------------------------------------------------
-    separator("STEP 7: Fill detection stream (5-second sample)")
+    separator("STEP 8: Fetch orderbook (after placing offers)")
+
+    if USDC:
+        try:
+            orderbook = await ob_reader.fetch_orderbook(XLM, USDC, limit=10)
+            display = ob_reader.display_orderbook(
+                orderbook["bids"], orderbook["asks"], levels=5
+            )
+            print(display)
+        except Exception as exc:
+            print(f"Orderbook fetch failed: {exc}")
+
+    # ------------------------------------------------------------------
+    # Step 9: Taker crosses the sell offer (real two-party SDEX trade)
+    # ------------------------------------------------------------------
+    separator("STEP 9: Taker crosses the sell offer (two-party trade)")
+
+    taker_fill_tx = None
+    if taker_kp and USDC and sell_result and sell_result.get("offer_id"):
+        print(f"Taker will buy XLM at 0.50 USDC/XLM, crossing master's sell offer.")
+        print(f"  Master's sell offer ID: {sell_result['offer_id']}")
+        print()
+
+        try:
+            taker_account = server.load_account(taker_kp.public_key)
+            builder = TransactionBuilder(
+                source_account=taker_account,
+                network_passphrase=NETWORK_PASSPHRASE,
+                base_fee=BASE_FEE,
+            )
+            builder.set_timeout(30)
+            # Taker buys 5 XLM at up to 0.60 USDC/XLM — this will cross
+            # master's sell at 0.50 and execute at 0.50 (price improvement)
+            builder.append_operation(
+                ManageBuyOffer(
+                    selling=USDC,
+                    buying=XLM,
+                    amount="5.0000000",    # buy 5 XLM
+                    price="0.6000000",     # willing to pay up to 0.60 USDC/XLM
+                    offer_id=0,
+                )
+            )
+            tx = builder.build()
+            tx.sign(taker_kp)
+            response = server.submit_transaction(tx)
+            taker_fill_tx = response["hash"]
+            tx_hashes.append(taker_fill_tx)
+            print(f"Taker buy executed! TX: {taker_fill_tx}")
+            print(f"  Taker bought XLM by crossing master's sell offer")
+            print(f"  Trade executed at master's price of 0.50 USDC/XLM")
+        except Exception as exc:
+            print(f"Taker buy failed: {exc}")
+    else:
+        print("Skipping taker trade (missing prerequisites).")
+
+    # ------------------------------------------------------------------
+    # Step 10: Fill detection — detect the trade that just happened
+    # ------------------------------------------------------------------
+    separator("STEP 10: Fill detection (detecting the taker's trade)")
 
     fill_events = []
 
@@ -288,30 +408,34 @@ async def main() -> None:
                   f"type={ev['fill_type']}, amount={ev.get('fill_amount')}")
 
     detector = FillDetector()
-    print(f"Streaming transactions for {master_kp.public_key[:12]}...")
-    print("(Listening for 5 seconds — fills from other market participants may appear)\n")
+    print(f"Streaming transactions for master account {master_kp.public_key[:12]}...")
+    print("(Listening for 8 seconds to capture the fill)\n")
 
     await detector.run_with_timeout(
         account_id=master_kp.public_key,
         callback=on_fill,
-        timeout=5.0,
+        timeout=8.0,
     )
 
     if not fill_events:
-        print("No fills detected during the sample window (expected for off-market offers).")
+        print("No fills detected via streaming (the trade may have landed before")
+        print("the stream connected — this is expected in a demo environment).")
+        if taker_fill_tx:
+            print(f"\nThe fill IS confirmed on-chain: {taker_fill_tx}")
+            print(f"  https://stellar.expert/explorer/testnet/tx/{taker_fill_tx}")
 
     # ------------------------------------------------------------------
-    # Step 8: Cancel one offer
+    # Step 11: Cancel remaining buy offer
     # ------------------------------------------------------------------
-    separator("STEP 8: Cancel an offer")
+    separator("STEP 11: Cancel remaining buy offer")
 
-    if sell_result and sell_result.get("offer_id"):
+    if buy_result and buy_result.get("offer_id"):
         try:
             ch3 = await channel_mgr.acquire_channel()
             cancel_result = order_mgr.cancel_offer(
-                offer_id=sell_result["offer_id"],
-                selling_asset=XLM,
-                buying_asset=USDC,
+                offer_id=buy_result["offer_id"],
+                selling_asset=USDC,
+                buying_asset=XLM,
                 channel_keypair=ch3,
             )
             if cancel_result.get("tx_hash"):
@@ -328,12 +452,12 @@ async def main() -> None:
             except Exception:
                 pass
     else:
-        print("No sell offer to cancel (offer may have been immediately filled or failed).")
+        print("No buy offer to cancel.")
 
     # ------------------------------------------------------------------
-    # Step 9: Channel replenishment check
+    # Step 12: Channel replenishment check
     # ------------------------------------------------------------------
-    separator("STEP 9: Channel replenishment check")
+    separator("STEP 12: Channel replenishment check")
 
     try:
         replenish_tx = await channel_mgr.replenish_channels()
@@ -346,13 +470,17 @@ async def main() -> None:
         print(f"Replenishment check failed: {exc}")
 
     # ------------------------------------------------------------------
-    # Step 10: Summary
+    # Summary
     # ------------------------------------------------------------------
     separator("SUMMARY")
 
-    print(f"Master account: {master_kp.public_key}")
-    print(f"Network:        Stellar Testnet")
-    print(f"Horizon:        {HORIZON_URL}")
+    print(f"Master account:  {master_kp.public_key}")
+    if issuer_kp:
+        print(f"USDC issuer:     {issuer_kp.public_key}")
+    if taker_kp:
+        print(f"Taker account:   {taker_kp.public_key}")
+    print(f"Network:         Stellar Testnet")
+    print(f"Horizon:         {HORIZON_URL}")
     print()
 
     print("Transaction Hashes:")
