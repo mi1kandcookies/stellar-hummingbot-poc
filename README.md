@@ -56,7 +56,7 @@ No browser setup, wallets, or manual account creation required. The demo funds a
 8. Place a buy offer (5 XLM @ 0.30 USDC) via channel 2
 9. Taker crosses the sell offer - real two-party SDEX trade at maker's price
 10. Run fill detection stream (8 seconds)
-11. Cancel the remaining buy offer
+11. Cancel both remaining offers (sell remainder + buy)
 12. Check channel balances and replenish if needed
 13. Print summary with all transaction hashes and Stellar Expert links
 
@@ -82,17 +82,18 @@ src/
 
 ## Transaction Evidence
 
-The most recent run produced 12 on-chain testnet transactions across three independent accounts (master, taker, issuer). Full details with account IDs, offer IDs, and explorer links are in [TESTNET_EVIDENCE.md](TESTNET_EVIDENCE.md).
+The most recent run produced 13 on-chain testnet transactions across three independent accounts (master, taker, issuer). Full details with account IDs, offer IDs, and explorer links are in [TESTNET_EVIDENCE.md](TESTNET_EVIDENCE.md).
 
 Key transactions:
 
 | # | Operation | Explorer |
 |---|-----------|----------|
-| 8 | Batched channel creation (3 accounts) | [View](https://stellar.expert/explorer/testnet/tx/ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3) |
-| 9 | ManageSellOffer via channel 1 | [View](https://stellar.expert/explorer/testnet/tx/6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65) |
-| 10 | ManageBuyOffer via channel 2 | [View](https://stellar.expert/explorer/testnet/tx/a94a991846000c07a2105642bfb643efecb2b809d84b1fe6b8bff864eeb39e85) |
-| 11 | **Taker crosses sell offer (real trade)** | [View](https://stellar.expert/explorer/testnet/tx/0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887) |
-| 12 | Cancel buy offer | [View](https://stellar.expert/explorer/testnet/tx/8f86edbb93b215b4c8e3e8752a243a780bce51df3d26222e90062885d99ce3dd) |
+| 8 | Batched channel creation (3 accounts) | [View](https://stellar.expert/explorer/testnet/tx/bd58b663a8d2952a22e59030657a61f71f4b9086e834fbdc15f9c8389c050afe) |
+| 9 | ManageSellOffer via channel 1 | [View](https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5) |
+| 10 | ManageBuyOffer via channel 2 | [View](https://stellar.expert/explorer/testnet/tx/90174e7aae2cf4c04a6bb102499f2b171e03d34cea61bba0ffb12f0e30d13f68) |
+| 11 | **Taker crosses sell offer (real trade)** | [View](https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992) |
+| 12 | Cancel sell offer remainder | [View](https://stellar.expert/explorer/testnet/tx/0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5) |
+| 13 | Cancel buy offer | [View](https://stellar.expert/explorer/testnet/tx/82d432c793d037f8742137b2495651d4f469fdb1ed604f54f4776d03c0150751) |
 
 ## Technical Documentation
 

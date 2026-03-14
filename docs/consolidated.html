@@ -525,7 +525,7 @@ sequenceDiagram
     </div>
   </div>
 
-  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65" target="_blank">Testnet TX 9: Sell offer - note two signers (channel + master)</a>
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5" target="_blank">Testnet TX 9: Sell offer - note two signers (channel + master)</a>
 </section>
 
 <!-- 3 -->
@@ -576,7 +576,7 @@ flowchart TD
     <li>On sequence error, the local value is invalidated and re-fetched automatically</li>
   </ul>
 
-  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3" target="_blank">Testnet TX 8: Batched channel creation (3 accounts, single tx)</a>
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/bd58b663a8d2952a22e59030657a61f71f4b9086e834fbdc15f9c8389c050afe" target="_blank">Testnet TX 8: Batched channel creation (3 accounts, single tx)</a>
 </section>
 
 <!-- 4 -->
@@ -697,7 +697,7 @@ BUY order (selling=USDC):
   remaining_quote = offer_entry.amount / 10_000_000
   remaining_base  = remaining_quote / order_price</pre>
 
-  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887" target="_blank">Testnet TX 11: Taker crosses sell offer - produces LedgerEntryChange pattern</a>
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992" target="_blank">Testnet TX 11: Taker crosses sell offer - produces LedgerEntryChange pattern</a>
 </section>
 
 <!-- 6 -->
@@ -877,17 +877,17 @@ flowchart LR
     <h2>Testnet Prototype</h2>
   </div>
 
-  <p>A standalone Python proof-of-concept validates the architectural patterns described above. It executes 12 on-chain testnet transactions across three independent accounts (master, taker, issuer) demonstrating the full SDEX trade lifecycle.</p>
+  <p>A standalone Python proof-of-concept validates the architectural patterns described above. It executes 13 on-chain testnet transactions across three independent accounts (master, taker, issuer) demonstrating the full SDEX trade lifecycle.</p>
 
   <div class="table-wrap">
     <table>
       <thead><tr><th>Capability</th><th>What It Proves</th><th>Transaction</th></tr></thead>
       <tbody>
-        <tr><td>Channel account batching</td><td>Single tx creates 3 channels at 2.0 XLM each</td><td><a href="https://stellar.expert/explorer/testnet/tx/ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3" target="_blank">TX 8</a></td></tr>
-        <tr><td>ManageSellOffer via channel</td><td>Channel as tx source, master as op source, offer ID from XDR</td><td><a href="https://stellar.expert/explorer/testnet/tx/6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65" target="_blank">TX 9</a></td></tr>
-        <tr><td>ManageBuyOffer via channel</td><td>Same pattern, different channel, parallel submission</td><td><a href="https://stellar.expert/explorer/testnet/tx/a94a991846000c07a2105642bfb643efecb2b809d84b1fe6b8bff864eeb39e85" target="_blank">TX 10</a></td></tr>
-        <tr><td>Two-party SDEX trade</td><td>Independent taker crosses master's sell at maker's price</td><td><a href="https://stellar.expert/explorer/testnet/tx/0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887" target="_blank">TX 11</a></td></tr>
-        <tr><td>Offer cancellation</td><td>ManageSellOffer(amount=0), graceful already-gone handling</td><td><a href="https://stellar.expert/explorer/testnet/tx/8f86edbb93b215b4c8e3e8752a243a780bce51df3d26222e90062885d99ce3dd" target="_blank">TX 12</a></td></tr>
+        <tr><td>Channel account batching</td><td>Single tx creates 3 channels at 2.0 XLM each</td><td><a href="https://stellar.expert/explorer/testnet/tx/bd58b663a8d2952a22e59030657a61f71f4b9086e834fbdc15f9c8389c050afe" target="_blank">TX 8</a></td></tr>
+        <tr><td>ManageSellOffer via channel</td><td>Channel as tx source, master as op source, offer ID from XDR</td><td><a href="https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5" target="_blank">TX 9</a></td></tr>
+        <tr><td>ManageBuyOffer via channel</td><td>Same pattern, different channel, parallel submission</td><td><a href="https://stellar.expert/explorer/testnet/tx/90174e7aae2cf4c04a6bb102499f2b171e03d34cea61bba0ffb12f0e30d13f68" target="_blank">TX 10</a></td></tr>
+        <tr><td>Two-party SDEX trade</td><td>Independent taker crosses master's sell at maker's price</td><td><a href="https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992" target="_blank">TX 11</a></td></tr>
+        <tr><td>Offer cancellation</td><td>ManageSellOffer(amount=0), graceful already-gone handling</td><td><a href="https://stellar.expert/explorer/testnet/tx/0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5" target="_blank">TX 12</a></td></tr>
         <tr><td>Asset lifecycle</td><td>Trustline setup, USDC issuance, cross-account payments</td><td>TX 3-7</td></tr>
         <tr><td>XDR parsing</td><td>TransactionMeta v0-v3, LedgerEntry vs LedgerKey</td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/fill_detector.py" target="_blank">fill_detector.py</a></td></tr>
         <tr><td>Reserve-aware balance checks</td><td>Base reserve + subentries + selling_liabilities</td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/order_manager.py" target="_blank">order_manager.py</a></td></tr>

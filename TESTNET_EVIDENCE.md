@@ -6,54 +6,56 @@ All transactions below were executed on the Stellar testnet and can be independe
 
 | Role | Public Key |
 |------|-----------|
-| Master (trader) | `GDEJ4N67LUACGB24TUQHCVNIHBEB7WBJAIF5E5KEUSARB33UVHCBHHJB` |
-| USDC Issuer | `GCBVXE5QXMSHJS3ZMLBAFRBMAJNSEZFLQORMNZJLWLE5S5KU3PFVTVNU` |
-| Taker (counterparty) | `GADKFWQFYKGPCDWIHMWQR7YOMDY73G5SC5QXOPRVBQ7MSPR24S44JGSD` |
-| Channel 1 | `GADAG4MYKFEG7BNRHJERBM7AM6Z7NH6WMZUD4HLQAWU2VCVQLUD2JPIJ` |
-| Channel 2 | `GAKGML3MCZYQ3LHUNQT5EF55VCM2XNWY3B4K6XAFBYW7TSKA44R7FENX` |
-| Channel 3 | `GBOHA5QSMHGRYGD6STUJTFS3N7UIVCO3UA4D5XNJ3Q6RWTHC25CFDGQW` |
+| Master (trader) | `GA74O7WJYPBOZOSDQR5UFN4Z3WF4LB3SBFXIQPQ6TDA3I6KFSAIFJVDV` |
+| USDC Issuer | `GDI5CSSFIWA2AL62WA2J4E2VQBM7QSHQCNLOQYK6K5MVCYJMQIS6IKRW` |
+| Taker (counterparty) | `GC65I6GL5KFNGH6IEPXLSPKYLCCSHJ42XLGGHYIKCVABEXTNPSZQ4QJH` |
+| Channel 1 | `GA76IWJ4LQWTOVTWUEFLYONBY4WMKS65VI2YDCUQKVZGBIUVW6ZH2YGN` |
+| Channel 2 | `GA7A6UK2QXULDJLPYF4MBGH2BHZ3D6PSKNGCBMLQGS5MYD36HIPYQTDE` |
+| Channel 3 | `GD6D76X5M26FYZRGAEFVCKQ2CXOMHHZEOR3AWS2M3KF6GVDVL52AKTTT` |
 
 ## Transactions
 
 | # | Operation | TX Hash | Explorer Link |
 |---|-----------|---------|---------------|
-| 1 | Friendbot funding (master) | `c688cc8ad187614f0770a16e34f65955fa149127d2eb11e5e8e161171f2111a8` | [View](https://stellar.expert/explorer/testnet/tx/c688cc8ad187614f0770a16e34f65955fa149127d2eb11e5e8e161171f2111a8) |
-| 2 | Friendbot funding (USDC issuer) | `dc44c31e3c8a1b49820f9c6df5bb14f8b6509f3fb35479594b138a2191700df0` | [View](https://stellar.expert/explorer/testnet/tx/dc44c31e3c8a1b49820f9c6df5bb14f8b6509f3fb35479594b138a2191700df0) |
-| 3 | USDC trustline on master (ChangeTrust) | `4565b86fdaeef3ae470a389d206e734bfea37fbe24fd9518cfb3a11fed3645ce` | [View](https://stellar.expert/explorer/testnet/tx/4565b86fdaeef3ae470a389d206e734bfea37fbe24fd9518cfb3a11fed3645ce) |
-| 4 | Mint 1,000 USDC to master | `d8e28dc344e68611d0808f536ccb82ec8a5dcf32282c0b0e9e351ebcea6e90cd` | [View](https://stellar.expert/explorer/testnet/tx/d8e28dc344e68611d0808f536ccb82ec8a5dcf32282c0b0e9e351ebcea6e90cd) |
-| 5 | Friendbot funding (taker) | `a01274c32dc1c26f0b84b26e6935468e933eb26ff3e161f91bdf9225943d9512` | [View](https://stellar.expert/explorer/testnet/tx/a01274c32dc1c26f0b84b26e6935468e933eb26ff3e161f91bdf9225943d9512) |
-| 6 | USDC trustline on taker | `ff512477c85c0c8931bdeda9476dd87afa275b2fe7ef8424ce8249247f75e366` | [View](https://stellar.expert/explorer/testnet/tx/ff512477c85c0c8931bdeda9476dd87afa275b2fe7ef8424ce8249247f75e366) |
-| 7 | Mint 500 USDC to taker | `62515efa8c3b35c536013de3d89225aae08a4170a032550028abf161c00c36b1` | [View](https://stellar.expert/explorer/testnet/tx/62515efa8c3b35c536013de3d89225aae08a4170a032550028abf161c00c36b1) |
-| 8 | Batched channel creation (3 accounts) | `ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3` | [View](https://stellar.expert/explorer/testnet/tx/ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3) |
-| 9 | ManageSellOffer (10 XLM @ 0.50 USDC) | `6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65` | [View](https://stellar.expert/explorer/testnet/tx/6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65) |
-| 10 | ManageBuyOffer (5 XLM @ 0.30 USDC) | `a94a991846000c07a2105642bfb643efecb2b809d84b1fe6b8bff864eeb39e85` | [View](https://stellar.expert/explorer/testnet/tx/a94a991846000c07a2105642bfb643efecb2b809d84b1fe6b8bff864eeb39e85) |
-| 11 | **Taker crosses sell offer (real trade)** | `0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887` | [View](https://stellar.expert/explorer/testnet/tx/0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887) |
-| 12 | Cancel buy offer (offer 66282) | `8f86edbb93b215b4c8e3e8752a243a780bce51df3d26222e90062885d99ce3dd` | [View](https://stellar.expert/explorer/testnet/tx/8f86edbb93b215b4c8e3e8752a243a780bce51df3d26222e90062885d99ce3dd) |
+| 1 | Friendbot funding (master) | `448bea874acce997c2721a4b6affd4a14bce1b088f9114b67e594ade66b54dcf` | [View](https://stellar.expert/explorer/testnet/tx/448bea874acce997c2721a4b6affd4a14bce1b088f9114b67e594ade66b54dcf) |
+| 2 | Friendbot funding (USDC issuer) | `3a12d5e01ba57646d6c4788098804423d83470c33100f454a9a6b4b1fd97eebc` | [View](https://stellar.expert/explorer/testnet/tx/3a12d5e01ba57646d6c4788098804423d83470c33100f454a9a6b4b1fd97eebc) |
+| 3 | USDC trustline on master (ChangeTrust) | `eeb614ac46c362ba4f19e7b2386b649c363cccf2b6699e2ca77c9618064c9322` | [View](https://stellar.expert/explorer/testnet/tx/eeb614ac46c362ba4f19e7b2386b649c363cccf2b6699e2ca77c9618064c9322) |
+| 4 | Mint 1,000 USDC to master | `d8cfe4388e61fa24bb564ba7dddaf10a43a05d51dca534722955cefd41612832` | [View](https://stellar.expert/explorer/testnet/tx/d8cfe4388e61fa24bb564ba7dddaf10a43a05d51dca534722955cefd41612832) |
+| 5 | Friendbot funding (taker) | `b52565952adebfd06bbaf85caf017f73fb1e89221ee7856c87a3a06117652728` | [View](https://stellar.expert/explorer/testnet/tx/b52565952adebfd06bbaf85caf017f73fb1e89221ee7856c87a3a06117652728) |
+| 6 | USDC trustline on taker | `b6f9c171c2e9983e6bb2813f6738ad0e4ab28ed4c6bcf88d801ca2fa39cb1c9e` | [View](https://stellar.expert/explorer/testnet/tx/b6f9c171c2e9983e6bb2813f6738ad0e4ab28ed4c6bcf88d801ca2fa39cb1c9e) |
+| 7 | Mint 500 USDC to taker | `bb2abc623b733223addcf6f881bd82cd3da83eb743787a6758d93fbc02dba77e` | [View](https://stellar.expert/explorer/testnet/tx/bb2abc623b733223addcf6f881bd82cd3da83eb743787a6758d93fbc02dba77e) |
+| 8 | Batched channel creation (3 accounts) | `bd58b663a8d2952a22e59030657a61f71f4b9086e834fbdc15f9c8389c050afe` | [View](https://stellar.expert/explorer/testnet/tx/bd58b663a8d2952a22e59030657a61f71f4b9086e834fbdc15f9c8389c050afe) |
+| 9 | ManageSellOffer (10 XLM @ 0.50 USDC) | `127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5` | [View](https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5) |
+| 10 | ManageBuyOffer (5 XLM @ 0.30 USDC) | `90174e7aae2cf4c04a6bb102499f2b171e03d34cea61bba0ffb12f0e30d13f68` | [View](https://stellar.expert/explorer/testnet/tx/90174e7aae2cf4c04a6bb102499f2b171e03d34cea61bba0ffb12f0e30d13f68) |
+| 11 | **Taker crosses sell offer (real trade)** | `4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992` | [View](https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992) |
+| 12 | Cancel sell offer remainder (offer 66286) | `0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5` | [View](https://stellar.expert/explorer/testnet/tx/0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5) |
+| 13 | Cancel buy offer (offer 66288) | `82d432c793d037f8742137b2495651d4f469fdb1ed604f54f4776d03c0150751` | [View](https://stellar.expert/explorer/testnet/tx/82d432c793d037f8742137b2495651d4f469fdb1ed604f54f4776d03c0150751) |
 
 ## What Each Transaction Demonstrates
 
 - **TX 1-2**: Account creation and funding via Friendbot
-- **TX 3-4**: Asset lifecycle -trustline setup followed by USDC issuance from a dedicated issuer account
-- **TX 5-7**: Independent taker account setup -Friendbot funding, trustline, and USDC allocation from issuer
-- **TX 8**: Batched channel creation -single transaction with 3 `CreateAccount` operations, each funded with 2.0 XLM. This is the batching pattern described in our architecture doc Section 5.
-- **TX 9**: Sell offer via channel 1 -channel is the transaction source, master account is the operation source (note the two signers). Offer ID 66281 extracted from result XDR.
-- **TX 10**: Buy offer via channel 2 -same source-separation pattern, different channel, demonstrating parallel submission capability. Offer ID 66282.
-- **TX 11**: **Two-party SDEX trade** -an independent taker account crosses master's sell offer. Taker submits a ManageBuyOffer at 0.60 USDC/XLM which matches against master's sell at 0.50 USDC/XLM, executing at the maker's price. This is a real trade between two separate accounts on the SDEX.
-- **TX 12**: Offer cancellation -`ManageSellOffer` with amount=0 targeting offer 66282. Demonstrates graceful lifecycle management.
+- **TX 3-4**: Asset lifecycle - trustline setup followed by USDC issuance from a dedicated issuer account
+- **TX 5-7**: Independent taker account setup - Friendbot funding, trustline, and USDC allocation from issuer
+- **TX 8**: Batched channel creation - single transaction with 3 `CreateAccount` operations, each funded with 2.0 XLM. This is the batching pattern described in our architecture doc Section 5.
+- **TX 9**: Sell offer via channel 1 - channel is the transaction source, master account is the operation source (note the two signers). Offer ID 66286 extracted from result XDR.
+- **TX 10**: Buy offer via channel 2 - same source-separation pattern, different channel, demonstrating parallel submission capability. Offer ID 66288.
+- **TX 11**: **Two-party SDEX trade** - an independent taker account crosses master's sell offer. Taker submits a ManageBuyOffer at 0.60 USDC/XLM which matches against master's sell at 0.50 USDC/XLM, executing at the maker's price. This is a real trade between two separate accounts on the SDEX.
+- **TX 12**: Cancel sell offer remainder - `ManageSellOffer` with amount=0 targeting offer 66286. The taker filled 5 of 10 XLM; this cancels the remaining 5.
+- **TX 13**: Cancel buy offer - `ManageSellOffer` with amount=0 targeting offer 66288. Full lifecycle cleanup.
 
 ## SDEX Offer IDs
 
 | Offer ID | Type | Asset Pair | Status |
 |----------|------|-----------|--------|
-| 66281 | ManageSellOffer | XLM/USDC | Filled (TX 11 -taker crossed) |
-| 66282 | ManageBuyOffer | XLM/USDC | Cancelled (TX 12) |
+| 66286 | ManageSellOffer | XLM/USDC | Partially filled (TX 11), remainder cancelled (TX 12) |
+| 66288 | ManageBuyOffer | XLM/USDC | Cancelled (TX 13) |
 
 ## Trade Details
 
 | Field | Value |
 |-------|-------|
-| Maker | Master account (GDEJ4N67...) |
-| Taker | Taker account (GADKFWQF...) |
+| Maker | Master account (GA74O7WJ...) |
+| Taker | Taker account (GC65I6GL...) |
 | Pair | XLM/USDC |
 | Side | Maker sold XLM, taker bought XLM |
 | Amount | 5 XLM |
