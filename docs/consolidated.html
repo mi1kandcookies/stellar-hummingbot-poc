@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stellar SDEX Hummingbot Connector - Consolidated Technical Architecture</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <style>
+    :root {
+      --stellar-blue: #0096D6;
+      --stellar-dark: #0A1628;
+      --stellar-mid: #1E3A5F;
+      --hbot-orange: #F97316;
+      --success: #16A34A;
+      --error: #DC2626;
+      --warning: #D97706;
+      --bg: #F8FAFC;
+      --card: #FFFFFF;
+      --border: #E2E8F0;
+      --text: #1E293B;
+      --text-light: #64748B;
+      --code-bg: #0F172A;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    .cover {
+      background: var(--stellar-dark);
+      color: white;
+      padding: 72px 60px 56px;
+    }
+
+    .cover-badge {
+      display: inline-block;
+      background: #1E3A5F;
+      border: 1px solid #334E6B;
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 11px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      color: #CBD5E1;
+    }
+
+    .cover h1 {
+      font-size: 34px;
+      font-weight: 700;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .cover-sub {
+      color: #CBD5E1;
+      font-size: 15px;
+      margin-top: 6px;
+    }
+
+    .cover-meta {
+      display: flex;
+      gap: 36px;
+      margin-top: 32px;
+      flex-wrap: wrap;
+    }
+
+    .cover-meta-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .cover-meta-label {
+      font-size: 10px;
+      color: #94A3B8;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .cover-meta-value {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .toc {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 60px;
+    }
+
+    .toc-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-light);
+      margin-bottom: 10px;
+    }
+
+    .toc-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .toc-links a {
+      font-size: 13px;
+      color: var(--stellar-blue);
+      text-decoration: none;
+      background: #EFF6FF;
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid #BFDBFE;
+      transition: all 0.15s;
+    }
+
+    .toc-links a:hover {
+      background: var(--stellar-blue);
+      color: white;
+    }
+
+    .container {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 52px 40px;
+    }
+
+    section {
+      margin-bottom: 60px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--border);
+    }
+
+    .section-number {
+      background: var(--stellar-blue);
+      color: white;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .section-header h2 {
+      font-size: 21px;
+      font-weight: 700;
+      color: var(--stellar-dark);
+    }
+
+    h3 {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--stellar-dark);
+      margin: 28px 0 10px;
+    }
+
+    p {
+      margin-bottom: 14px;
+      color: #334155;
+    }
+
+    .callout {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 18px 0;
+      border-left: 3px solid;
+      font-size: 14px;
+    }
+
+    .callout p { margin: 0; }
+
+    .callout-info {
+      background: #EFF6FF;
+      border-color: var(--stellar-blue);
+      color: #1D4ED8;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 18px 0;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+
+    thead th {
+      background: var(--stellar-dark);
+      color: white;
+      padding: 11px 16px;
+      text-align: left;
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    tbody tr:nth-child(even) { background: #F8FAFC; }
+    tbody tr { background: white; }
+
+    tbody td {
+      padding: 11px 16px;
+      border-top: 1px solid var(--border);
+      vertical-align: top;
+      color: #334155;
+      font-size: 13.5px;
+    }
+
+    tbody td:first-child {
+      font-size: 13px;
+      color: #334155;
+    }
+
+    pre {
+      background: var(--code-bg);
+      color: #E2E8F0;
+      padding: 18px 22px;
+      border-radius: 10px;
+      overflow-x: auto;
+      font-size: 13px;
+      line-height: 1.65;
+      margin: 14px 0;
+      font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+    }
+
+    code {
+      font-family: 'Monaco', 'Menlo', monospace;
+      font-size: 12px;
+      background: #F1F5F9;
+      color: #7C3AED;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    pre code {
+      background: transparent;
+      color: inherit;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    .diagram-wrap {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 22px 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      overflow-x: auto;
+    }
+
+    .diagram-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--text-light);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .diagram-label::before {
+      content: '';
+      display: inline-block;
+      width: 7px;
+      height: 7px;
+      background: var(--stellar-blue);
+      border-radius: 50%;
+    }
+
+    .mermaid {
+      display: flex;
+      justify-content: center;
+      min-height: 60px;
+    }
+
+    .ref-link {
+      display: inline-block;
+      font-size: 12px;
+      color: var(--stellar-blue);
+      margin-bottom: 16px;
+    }
+
+    .evidence-link {
+      display: inline-block;
+      font-size: 13px;
+      color: var(--stellar-blue);
+      text-decoration: none;
+      background: #EFF6FF;
+      padding: 4px 12px;
+      border-radius: 6px;
+      border: 1px solid #BFDBFE;
+      margin-top: 8px;
+    }
+
+    .evidence-link:hover {
+      background: var(--stellar-blue);
+      color: white;
+    }
+
+    ul {
+      margin: 8px 0 14px 24px;
+      color: #334155;
+    }
+
+    li {
+      margin-bottom: 4px;
+    }
+
+    footer {
+      background: var(--stellar-dark);
+      color: #94A3B8;
+      text-align: center;
+      padding: 22px;
+      font-size: 13px;
+      margin-top: 60px;
+    }
+
+    footer a { color: var(--stellar-blue); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<script>
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      primaryColor: '#0096D6',
+      primaryTextColor: '#1E293B',
+      primaryBorderColor: '#0074A8',
+      lineColor: '#64748B',
+      secondaryColor: '#1E3A5F',
+      tertiaryColor: '#F1F5F9',
+      background: '#ffffff',
+      fontFamily: 'Inter, -apple-system, sans-serif',
+      fontSize: '14px',
+      edgeLabelBackground: '#F8FAFC',
+      signalColor: '#1E293B',
+      signalTextColor: '#1E293B',
+      actorBkg: '#0096D6',
+      actorTextColor: '#ffffff',
+      actorBorder: '#0074A8',
+      actorLineColor: '#64748B',
+      noteBkgColor: '#EFF6FF',
+      noteTextColor: '#1E293B',
+      noteBorderColor: '#BFDBFE',
+      activationBkgColor: '#EFF6FF',
+      activationBorderColor: '#0096D6',
+      sequenceNumberColor: '#ffffff',
+      labelBoxBkgColor: '#EFF6FF',
+      labelBoxBorderColor: '#BFDBFE',
+      labelTextColor: '#1E293B',
+      loopTextColor: '#1E293B',
+      messageFontSize: '13px',
+      messageTextColor: '#1E293B'
+    },
+    flowchart: { curve: 'basis', useMaxWidth: true, htmlLabels: true },
+    sequence: { useMaxWidth: true, mirrorActors: false, boxMargin: 10, messageFontSize: 13, noteFontSize: 13, actorFontSize: 14 }
+  });
+</script>
+
+<div class="cover">
+  <div class="cover-badge">Consolidated Technical Architecture</div>
+  <h1>Stellar SDEX Hummingbot Connector</h1>
+  <p class="cover-sub">Key architectural decisions and diagrams. Each section cites the full architecture document for deeper detail.</p>
+  <div class="cover-meta">
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Version</span>
+      <span class="cover-meta-value">2.0</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Date</span>
+      <span class="cover-meta-value">March 14, 2026</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Authors</span>
+      <span class="cover-meta-value">Tharun Ekambaram &amp; Daniel Zilper</span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Full Document</span>
+      <span class="cover-meta-value"><a href="index.html" style="color: #93C5FD; text-decoration: none;">14-Section Technical Architecture</a></span>
+    </div>
+    <div class="cover-meta-item">
+      <span class="cover-meta-label">Testnet Prototype</span>
+      <span class="cover-meta-value"><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc" style="color: #93C5FD; text-decoration: none;">GitHub Repository</a></span>
+    </div>
+  </div>
+</div>
+
+<div class="toc">
+  <div class="toc-label">Contents</div>
+  <div class="toc-links">
+    <a href="#arch">1. System Architecture</a>
+    <a href="#tx">2. Transaction Flow</a>
+    <a href="#channels">3. Channel Accounts</a>
+    <a href="#orders">4. Order Lifecycle</a>
+    <a href="#fills">5. Fill Detection</a>
+    <a href="#orderbook">6. Orderbook Data</a>
+    <a href="#balance">7. Balance Management</a>
+    <a href="#errors">8. Error Recovery</a>
+    <a href="#amm">9. AMM Integration</a>
+    <a href="#prototype">10. Testnet Prototype</a>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- 1 -->
+<section id="arch">
+  <div class="section-header">
+    <div class="section-number">1</div>
+    <h2>System Architecture</h2>
+  </div>
+  <span class="ref-link">Full document: Section 1 - Executive Summary</span>
+
+  <p>The connector runs natively inside Hummingbot as a Python <code>ExchangePyBase</code> subclass. No Gateway, no Docker, no middleware. Writes go through Stellar RPC. Reads go through Horizon.</p>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">System Architecture</div>
+    <div class="mermaid">
+flowchart TD
+    TRADER["Trader"]
+
+    subgraph HB["Hummingbot Process - Python"]
+        STRAT["Strategy Layer\npure_market_making / avellaneda_market_making"]
+        EXCH["StellarExchange\nExchangePyBase subclass"]
+        OBT["OrderBookTracker"]
+        UST["UserStreamTracker"]
+        CHP["ChannelPool"]
+    end
+
+    subgraph NET["Network"]
+        RPC["Stellar RPC\nJSON-RPC 2.0"]
+        HOR["Horizon API\nREST and SSE"]
+    end
+
+    TRADER --> STRAT
+    STRAT --> EXCH
+    EXCH --> OBT
+    EXCH --> UST
+    EXCH --> CHP
+
+    CHP -- "sendTransaction\ngetTransaction\ngetNetwork" --> RPC
+    OBT -- "GET + SSE /order_book" --> HOR
+    UST -- "SSE /accounts/id/transactions" --> HOR
+    EXCH -- "GET /accounts/id\nGET /fee_stats" --> HOR
+
+    RPC -- "PENDING / SUCCESS / FAILED" --> EXCH
+    HOR -- "orderbook, transactions, balances" --> EXCH
+
+    classDef hbot fill:#F97316,stroke:#C2410C,color:#fff
+    classDef stellar fill:#0096D6,stroke:#0074A8,color:#fff
+    classDef horizon fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef user fill:#7C3AED,stroke:#5B21B6,color:#fff
+
+    class STRAT,EXCH,OBT,UST,CHP hbot
+    class RPC stellar
+    class HOR horizon
+    class TRADER user
+    </div>
+  </div>
+
+  <div class="callout callout-info">
+    <p><strong>Why RPC for writes, Horizon for reads?</strong> The RFP notes the connector should ideally use Stellar RPC. We use RPC for all write operations (sendTransaction, getTransaction, getNetwork). For orderbook reads, Stellar RPC has no endpoint for OfferEntry records - the persistent ledger state that makes up the SDEX orderbook. Horizon is the only production-ready API for this data. The market data layer is abstracted behind a single interface so it can migrate to Portfolio APIs or any future RPC orderbook endpoint without touching the rest of the connector.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section id="tx">
+  <div class="section-header">
+    <div class="section-number">2</div>
+    <h2>Transaction Submission Flow</h2>
+  </div>
+  <span class="ref-link">Full document: Section 4.1 - Stellar RPC, The Write Path</span>
+
+  <p>Every order placement and cancellation follows this flow. The channel account is the transaction source (pays the fee, owns the sequence number). The master account is the operation source (owns the offers).</p>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">Transaction Submission Flow</div>
+    <div class="mermaid">
+sequenceDiagram
+    participant SE as StellarExchange
+    participant CP as ChannelPool
+    participant RPC as Stellar RPC
+
+    SE->>CP: acquire_channel()
+    CP-->>SE: channel_account with local sequence
+    SE->>SE: Build transaction
+    SE->>SE: tx_hash = tx.hash_hex()
+    SE->>SE: Sign with base_keypair + channel_keypair
+    SE->>RPC: sendTransaction(tx_xdr)
+    RPC-->>SE: status PENDING
+    SE->>SE: Advance local sequence counter
+    SE->>RPC: getTransaction(tx_hash)
+    RPC-->>SE: NOT_FOUND, keep polling
+    SE->>RPC: getTransaction(tx_hash)
+    RPC-->>SE: SUCCESS or FAILED
+    SE->>SE: Parse result_xdr for offer_id
+    SE->>CP: release_channel()
+    </div>
+  </div>
+
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65" target="_blank">Testnet TX 9: Sell offer - note two signers (channel + master)</a>
+</section>
+
+<!-- 3 -->
+<section id="channels">
+  <div class="section-header">
+    <div class="section-number">3</div>
+    <h2>Channel Account Architecture</h2>
+  </div>
+  <span class="ref-link">Full document: Section 5 - Channel Account Architecture (5.1-5.4)</span>
+
+  <p>Stellar allows one transaction per account per ledger (~5-7 seconds). A market maker refreshing a three-level spread needs 12 simultaneous transactions. Channel accounts solve this.</p>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">Channel Account Lifecycle</div>
+    <div class="mermaid">
+flowchart TD
+    A([Uninitialized]) --> B([Ready])
+    B --> C([Acquiring])
+    C -- "semaphore acquired" --> D([InUse])
+    C -- "30s timeout exceeded" --> E([TimedOut])
+    E --> F([ChannelUnavailableError])
+    D --> G([Building])
+    G -- "TransactionBuilder.build()" --> H([Signing])
+    H -- "sign both keypairs" --> I([Submitted])
+    I -- "release_channel()" --> B
+    I -- "TX_BAD_SEQ" --> J([SequenceError])
+    J -- "invalidate, re-fetch" --> G
+    I -- "TX_INSUFF_FEE" --> K([FeeError])
+    K -- "re-fetch /fee_stats, rebuild" --> G
+
+    classDef normal fill:#0096D6,stroke:#0074A8,color:#fff
+    classDef ok fill:#16A34A,stroke:#15803D,color:#fff
+    classDef err fill:#DC2626,stroke:#B91C1C,color:#fff
+    classDef warn fill:#D97706,stroke:#B45309,color:#fff
+    classDef start fill:#1E3A5F,stroke:#3B82F6,color:#fff
+
+    class A,C,D,G,H,I start
+    class B,J,K normal
+    class F err
+    </div>
+  </div>
+
+  <ul>
+    <li>Channels are funded at 2.0 XLM, replenished when they drop below 1.5 XLM</li>
+    <li>All replenishments go into a single multi-operation transaction (one sequence number, one fee)</li>
+    <li>If the main account's available XLM is insufficient, the provisioner logs a warning and skips the cycle</li>
+    <li>Sequence numbers are tracked locally - no network round-trip before each submission</li>
+    <li>On sequence error, the local value is invalidated and re-fetched automatically</li>
+  </ul>
+
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3" target="_blank">Testnet TX 8: Batched channel creation (3 accounts, single tx)</a>
+</section>
+
+<!-- 4 -->
+<section id="orders">
+  <div class="section-header">
+    <div class="section-number">4</div>
+    <h2>Two-Phase Order ID and Offer Lifecycle</h2>
+  </div>
+  <span class="ref-link">Full document: Section 6 - Order Placement (6.1-6.4)</span>
+
+  <p>Stellar generates offer IDs after a transaction confirms on the ledger. We use the transaction hash as a provisional ID immediately, then swap it for the real offer ID once the transaction lands.</p>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">Two-Phase Order ID Resolution</div>
+    <div class="mermaid">
+sequenceDiagram
+    participant HB as Hummingbot
+    participant SE as StellarExchange
+    participant RPC as Stellar RPC
+    participant US as UserStream
+
+    HB->>SE: create_order(pair, SELL, amount, price)
+    SE->>SE: pre_check_balance for SELL
+    SE->>SE: build ManageSellOffer tx
+    SE->>SE: tx_hash = tx.hash_hex()
+    SE->>RPC: sendTransaction(tx_xdr)
+    RPC-->>SE: PENDING
+    SE-->>HB: return tx_hash as exchange_order_id
+    Note over HB: InFlightOrder tracked by tx_hash
+    Note over RPC: 5-7 seconds - ledger closes
+    US->>SE: Horizon SSE transaction event
+    SE->>SE: Parse result_xdr for offer_id
+    SE->>HB: OrderUpdate with real offer_id and state OPEN
+    Note over HB: exchange_order_id updated to offer_id
+    </div>
+  </div>
+
+  <h3>Buy vs Sell Balance Locking</h3>
+  <pre>
+SELL order - ManageSellOffer(selling=XLM):
+  Required:  available_XLM >= order_amount
+
+BUY order - ManageBuyOffer(selling=USDC to buy XLM):
+  Required:  available_USDC >= (order_amount x price)</pre>
+</section>
+
+<!-- 5 -->
+<section id="fills">
+  <div class="section-header">
+    <div class="section-number">5</div>
+    <h2>Fill Detection and XDR Parsing</h2>
+  </div>
+  <span class="ref-link">Full document: Section 7 - Fill Detection and User Stream (7.1-7.3)</span>
+
+  <p>Fill detection runs through Horizon's account transaction SSE stream. The connector parses <code>TransactionMeta</code> XDR to extract offer state changes.</p>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">User Stream Processing</div>
+    <div class="mermaid">
+flowchart TD
+    SSE(["Horizon SSE\n/accounts/id/transactions\ncursor = saved position"])
+    PARSE["Parse SSE event\nsave paging_token as cursor"]
+    OUR{"tx_hash in\npending_tx_hashes?"}
+    OURS_YES["Parse result_xdr\nExtract offer_id\nEmit OrderUpdate OPEN"]
+    OURS_NO["Parse result_meta_xdr\nSearch for our offer IDs\nin LedgerEntryChanges"]
+    FOUND{"Our offer ID\naffected?"}
+    EMIT["Extract fill amounts\nEmit TradeUpdate\nEmit OrderUpdate"]
+    IGN["Ignore"]
+    STALE["Cursor expired"]
+    CATCHUP["_all_trade_updates_for_order\nfor all active orders"]
+    RESUME["Resume with cursor=now"]
+
+    SSE --> PARSE --> OUR
+    OUR -- "yes - our submission" --> OURS_YES
+    OUR -- "no" --> OURS_NO --> FOUND
+    FOUND -- "yes" --> EMIT
+    FOUND -- "no" --> IGN
+    STALE --> CATCHUP --> RESUME
+
+    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
+    classDef orange fill:#F97316,stroke:#EA580C,color:#fff
+    classDef green fill:#16A34A,stroke:#15803D,color:#fff
+    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
+    classDef err fill:#DC2626,stroke:#B91C1C,color:#fff
+
+    class SSE,PARSE dark
+    class OUR,FOUND orange
+    class OURS_YES,OURS_NO,CATCHUP,RESUME blue
+    class EMIT green
+    class STALE err
+    class IGN dark
+    </div>
+  </div>
+
+  <h3>XDR Parsing Details</h3>
+  <ul>
+    <li><code>TransactionMeta</code> versions 0-4 are all handled for protocol compatibility</li>
+    <li>Created/Updated entries are <code>LedgerEntry</code> objects (access via <code>.data.type</code>)</li>
+    <li>Removed entries are <code>LedgerKey</code> objects (access directly via <code>.type</code> - no <code>.data</code> wrapper)</li>
+    <li><code>OfferEntry.amount</code> is always in the selling asset. For buy orders, divide by price to get base amount</li>
+  </ul>
+
+  <pre>
+# CREATED or UPDATED - LedgerEntry
+if change.created.data.type == LedgerEntryType.OFFER:
+    offer = change.created.data.offer    # OfferEntry
+
+# REMOVED - LedgerKey (no .data wrapper)
+if change.removed.type == LedgerEntryType.OFFER:
+    offer_id = str(change.removed.offer.offer_id)</pre>
+
+  <h3>Fill Amount Calculation</h3>
+  <pre>
+SELL order (selling=XLM):
+  remaining_base = offer_entry.amount / 10_000_000
+
+BUY order (selling=USDC):
+  remaining_quote = offer_entry.amount / 10_000_000
+  remaining_base  = remaining_quote / order_price</pre>
+
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887" target="_blank">Testnet TX 11: Taker crosses sell offer - produces LedgerEntryChange pattern</a>
+</section>
+
+<!-- 6 -->
+<section id="orderbook">
+  <div class="section-header">
+    <div class="section-number">6</div>
+    <h2>Orderbook Data</h2>
+  </div>
+  <span class="ref-link">Full document: Section 4.2 - Horizon, The Read Path</span>
+
+  <p>The SDEX orderbook is made up of <code>OfferEntry</code> records sitting in the ledger as persistent state. There is no event stream that can reconstruct it. Horizon's <code>/order_book</code> endpoint is the only public API that reads it directly.</p>
+
+  <p>Each SSE event from Horizon's <code>/order_book</code> stream delivers a complete orderbook snapshot for both bid and ask sides - not an incremental diff. On reconnection, the data source performs a full GET request to re-establish baseline state before resuming the SSE stream.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Endpoint</th><th>Method</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>/order_book</td><td>GET + SSE</td><td>Orderbook snapshot and per-ledger streaming</td></tr>
+        <tr><td>/accounts/id/transactions</td><td>SSE</td><td>Fill detection via account transaction stream</td></tr>
+        <tr><td>/accounts/id</td><td>GET</td><td>Account balances and subentry count</td></tr>
+        <tr><td>/accounts/id/offers</td><td>GET</td><td>Open offer count for reserve calculation (batched)</td></tr>
+        <tr><td>/fee_stats</td><td>GET</td><td>Classic transaction fee estimation (p90 percentile)</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 7 -->
+<section id="balance">
+  <div class="section-header">
+    <div class="section-number">7</div>
+    <h2>Balance Management</h2>
+  </div>
+  <span class="ref-link">Full document: Section 8 - Balance Management</span>
+
+  <pre>
+available_XLM = total_XLM
+              - 1.0 XLM                       # base account reserve
+              - 0.5 XLM x num_trustlines       # per trustline subentry
+              - 0.5 XLM x num_open_offers       # per open offer subentry
+              - xlm.selling_liabilities          # XLM committed to open sell orders
+
+available_USDC = total_USDC - usdc.selling_liabilities</pre>
+
+  <p>All values from Horizon are strings. Always use <code>Decimal(balance["balance"])</code> - never <code>float()</code>. Status polling uses a single batched call to <code>/accounts/id/offers</code> for all open orders rather than one request per order.</p>
+</section>
+
+<!-- 8 -->
+<section id="errors">
+  <div class="section-header">
+    <div class="section-number">8</div>
+    <h2>Error Recovery</h2>
+  </div>
+  <span class="ref-link">Full document: Section 9 - Error Handling</span>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">Error Handling Flow</div>
+    <div class="mermaid">
+flowchart TD
+    SEND["sendTransaction()"]
+    S{"status"}
+    PEND["PENDING\nAdvance local sequence\nBegin polling"]
+    ERRPARSE["ERROR\nParse errorResultXdr"]
+
+    BADSEQ["TX_BAD_SEQ"]
+    BADFEE["TX_INSUFF_FEE"]
+    BALBAD["TX_INSUFF_BALANCE"]
+    OTHER["Other error"]
+
+    ASEQ["Invalidate sequence\nRe-fetch, retry"]
+    AFEE["Re-fetch /fee_stats\nRebuild, retry"]
+    ABAL["Log: add XLM\nMark FAILED"]
+    AOTH["Log error\nMark FAILED"]
+
+    POLL["Poll getTransaction\nevery 3s, max 210s"]
+    PS{"status"}
+    NF["NOT_FOUND\nKeep polling"]
+    SUC["SUCCESS\nExtract offer_id\nEmit OPEN"]
+    FAIL["FAILED\nParse op error\nEmit FAILED"]
+    TIME["Timeout 210s\nTX expired\nMark FAILED"]
+
+    SEND --> S
+    S -- "PENDING" --> PEND --> POLL
+    S -- "ERROR" --> ERRPARSE
+    ERRPARSE --> BADSEQ --> ASEQ
+    ERRPARSE --> BADFEE --> AFEE
+    ERRPARSE --> BALBAD --> ABAL
+    ERRPARSE --> OTHER --> AOTH
+    POLL --> PS
+    PS -- "NOT_FOUND" --> NF --> POLL
+    PS -- "SUCCESS" --> SUC
+    PS -- "FAILED" --> FAIL
+    PS -- "timeout" --> TIME
+
+    classDef blue fill:#0096D6,stroke:#0074A8,color:#fff
+    classDef green fill:#16A34A,stroke:#15803D,color:#fff
+    classDef red fill:#DC2626,stroke:#B91C1C,color:#fff
+    classDef orange fill:#D97706,stroke:#B45309,color:#fff
+    classDef dark fill:#1E3A5F,stroke:#3B82F6,color:#fff
+
+    class PEND,POLL,ASEQ,AFEE blue
+    class SUC green
+    class FAIL,TIME,ABAL,AOTH red
+    class S,PS,ERRPARSE orange
+    class SEND,NF,BADSEQ,BADFEE,BALBAD,OTHER dark
+    </div>
+  </div>
+
+  <p>Every error code comes from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code> - typed Python enums. No string comparisons. Sequence and fee errors are retried automatically. Balance and unknown errors are surfaced to the strategy.</p>
+</section>
+
+<!-- 9 -->
+<section id="amm">
+  <div class="section-header">
+    <div class="section-number">9</div>
+    <h2>AMM Integration (Phase 2)</h2>
+  </div>
+  <span class="ref-link">Full document: Section 11 - AMM Integration</span>
+
+  <p>The core SDEX connector (Phase 1) does not include AMM integration. Phase 2 adds classic liquidity pools and Soroban AMM routing. It is documented here so Phase 2 can proceed without rearchitecting anything.</p>
+
+  <div class="diagram-wrap">
+    <div class="diagram-label">AMM Price Routing</div>
+    <div class="mermaid">
+flowchart LR
+    subgraph P1["Phase 1"]
+        SDEX["SDEX Orderbook\nOfferEntry state"]
+    end
+
+    subgraph P2["Phase 2"]
+        CLP["Classic Liquidity Pools\nLiquidityPoolDeposit\nLiquidityPoolWithdraw"]
+        SAM["Soroban AMMs\nSoroswap and Aquarius\nsimulate, assemble, submit"]
+    end
+
+    subgraph RT["Price Router"]
+        RES["Read pool reserves\nvia getContractData\nCompute output off-chain"]
+        CMP{"Compare prices"}
+        GS["Route to SDEX"]
+        GA["Route to AMM"]
+    end
+
+    SDEX --> CMP
+    CLP --> CMP
+    SAM --> RES --> CMP
+    CMP -- "SDEX better" --> GS
+    CMP -- "AMM better" --> GA
+
+    classDef p1 fill:#0096D6,stroke:#0074A8,color:#fff
+    classDef p2 fill:#7C3AED,stroke:#5B21B6,color:#fff
+    classDef rt fill:#F97316,stroke:#EA580C,color:#fff
+    classDef res fill:#16A34A,stroke:#15803D,color:#fff
+
+    class SDEX p1
+    class CLP,SAM,RES p2
+    class CMP rt
+    class GS,GA res
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Step</th><th>RPC Call</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>1 - Simulate</td><td>simulateTransaction</td><td>Returns the required footprint (ledger keys to read/write) and resource fee estimate</td></tr>
+        <tr><td>2 - Assemble</td><td>assembleTransaction</td><td>Attaches the footprint and resource limits to the transaction</td></tr>
+        <tr><td>3 - Submit</td><td>sendTransaction</td><td>Signs and broadcasts the fully assembled transaction</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- 10 -->
+<section id="prototype">
+  <div class="section-header">
+    <div class="section-number">10</div>
+    <h2>Testnet Prototype</h2>
+  </div>
+
+  <p>A standalone Python proof-of-concept validates the architectural patterns described above. It executes 12 on-chain testnet transactions across three independent accounts (master, taker, issuer) demonstrating the full SDEX trade lifecycle.</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Capability</th><th>What It Proves</th><th>Transaction</th></tr></thead>
+      <tbody>
+        <tr><td>Channel account batching</td><td>Single tx creates 3 channels at 2.0 XLM each</td><td><a href="https://stellar.expert/explorer/testnet/tx/ccd99350cebbce67344a2e6d2349499b2e150b1fb7bc3b58f90b18b7f06c11b3" target="_blank">TX 8</a></td></tr>
+        <tr><td>ManageSellOffer via channel</td><td>Channel as tx source, master as op source, offer ID from XDR</td><td><a href="https://stellar.expert/explorer/testnet/tx/6bb5aeba28489ee85bf556a53608069e4e6b5ef757329d5d842baf90033c5e65" target="_blank">TX 9</a></td></tr>
+        <tr><td>ManageBuyOffer via channel</td><td>Same pattern, different channel, parallel submission</td><td><a href="https://stellar.expert/explorer/testnet/tx/a94a991846000c07a2105642bfb643efecb2b809d84b1fe6b8bff864eeb39e85" target="_blank">TX 10</a></td></tr>
+        <tr><td>Two-party SDEX trade</td><td>Independent taker crosses master's sell at maker's price</td><td><a href="https://stellar.expert/explorer/testnet/tx/0c41fae936a81fe38c3c9420c96028e65ec31e4a38d92dac0494d2e679da0887" target="_blank">TX 11</a></td></tr>
+        <tr><td>Offer cancellation</td><td>ManageSellOffer(amount=0), graceful already-gone handling</td><td><a href="https://stellar.expert/explorer/testnet/tx/8f86edbb93b215b4c8e3e8752a243a780bce51df3d26222e90062885d99ce3dd" target="_blank">TX 12</a></td></tr>
+        <tr><td>Asset lifecycle</td><td>Trustline setup, USDC issuance, cross-account payments</td><td>TX 3-7</td></tr>
+        <tr><td>XDR parsing</td><td>TransactionMeta v0-v3, LedgerEntry vs LedgerKey</td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/fill_detector.py" target="_blank">fill_detector.py</a></td></tr>
+        <tr><td>Reserve-aware balance checks</td><td>Base reserve + subentries + selling_liabilities</td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/order_manager.py" target="_blank">order_manager.py</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <p style="margin-top: 16px;">
+    <a class="evidence-link" href="https://github.com/mi1kandcookies/stellar-hummingbot-poc" target="_blank">GitHub Repository</a>
+    <a class="evidence-link" href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/TESTNET_EVIDENCE.md" target="_blank" style="margin-left: 8px;">Full Transaction Evidence</a>
+  </p>
+</section>
+
+</div>
+
+<footer>
+  Stellar SDEX Hummingbot Connector - Consolidated Technical Architecture v2.0 |
+  <a href="index.html">Full Architecture Document</a> |
+  <a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc">Testnet Prototype</a>
+</footer>
+
+</body>
+</html>
