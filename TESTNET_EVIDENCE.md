@@ -33,19 +33,19 @@ All transactions below were executed on the Stellar testnet and can be independe
 ## What Each Transaction Demonstrates
 
 - **TX 1-2**: Account creation and funding via Friendbot
-- **TX 3-4**: Asset lifecycle — trustline setup followed by USDC issuance from a dedicated issuer account
-- **TX 5-7**: Independent taker account setup — Friendbot funding, trustline, and USDC allocation from issuer
-- **TX 8**: Batched channel creation — single transaction with 3 `CreateAccount` operations, each funded with 2.0 XLM. This is the batching pattern described in our architecture doc Section 5.
-- **TX 9**: Sell offer via channel 1 — channel is the transaction source, master account is the operation source (note the two signers). Offer ID 66281 extracted from result XDR.
-- **TX 10**: Buy offer via channel 2 — same source-separation pattern, different channel, demonstrating parallel submission capability. Offer ID 66282.
-- **TX 11**: **Two-party SDEX trade** — an independent taker account crosses master's sell offer. Taker submits a ManageBuyOffer at 0.60 USDC/XLM which matches against master's sell at 0.50 USDC/XLM, executing at the maker's price. This is a real trade between two separate accounts on the SDEX.
-- **TX 12**: Offer cancellation — `ManageSellOffer` with amount=0 targeting offer 66282. Demonstrates graceful lifecycle management.
+- **TX 3-4**: Asset lifecycle -trustline setup followed by USDC issuance from a dedicated issuer account
+- **TX 5-7**: Independent taker account setup -Friendbot funding, trustline, and USDC allocation from issuer
+- **TX 8**: Batched channel creation -single transaction with 3 `CreateAccount` operations, each funded with 2.0 XLM. This is the batching pattern described in our architecture doc Section 5.
+- **TX 9**: Sell offer via channel 1 -channel is the transaction source, master account is the operation source (note the two signers). Offer ID 66281 extracted from result XDR.
+- **TX 10**: Buy offer via channel 2 -same source-separation pattern, different channel, demonstrating parallel submission capability. Offer ID 66282.
+- **TX 11**: **Two-party SDEX trade** -an independent taker account crosses master's sell offer. Taker submits a ManageBuyOffer at 0.60 USDC/XLM which matches against master's sell at 0.50 USDC/XLM, executing at the maker's price. This is a real trade between two separate accounts on the SDEX.
+- **TX 12**: Offer cancellation -`ManageSellOffer` with amount=0 targeting offer 66282. Demonstrates graceful lifecycle management.
 
 ## SDEX Offer IDs
 
 | Offer ID | Type | Asset Pair | Status |
 |----------|------|-----------|--------|
-| 66281 | ManageSellOffer | XLM/USDC | Filled (TX 11 — taker crossed) |
+| 66281 | ManageSellOffer | XLM/USDC | Filled (TX 11 -taker crossed) |
 | 66282 | ManageBuyOffer | XLM/USDC | Cancelled (TX 12) |
 
 ## Trade Details

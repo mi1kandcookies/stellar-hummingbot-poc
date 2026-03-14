@@ -74,7 +74,7 @@ def _extract_offer_changes_from_meta(meta_xdr: str) -> List[Dict[str, Any]]:
             if meta.v2.tx_changes_after is not None:
                 all_change_groups.append(meta.v2.tx_changes_after.ledger_entry_changes)
     elif meta.v == 3:
-        # v3: same structure as v2 with additional soroban fields
+        # v3: same structure as v2 with additional soroban fields (Protocol 20+)
         if meta.v3 is not None:
             if meta.v3.tx_changes_before is not None:
                 all_change_groups.append(meta.v3.tx_changes_before.ledger_entry_changes)
@@ -85,7 +85,21 @@ def _extract_offer_changes_from_meta(meta_xdr: str) -> List[Dict[str, Any]]:
             if meta.v3.tx_changes_after is not None:
                 all_change_groups.append(meta.v3.tx_changes_after.ledger_entry_changes)
     else:
-        logger.debug("Unknown TransactionMeta version: %d", meta.v)
+        # v4 (Protocol 23) uses the same classic operation structure as v3.
+        # The stellar-sdk may expose it as v3 with additional fields, or as
+        # a distinct version. Attempt the v3-compatible path as a fallback.
+        v3_compat = getattr(meta, "v3", None)
+        if v3_compat is not None:
+            if v3_compat.tx_changes_before is not None:
+                all_change_groups.append(v3_compat.tx_changes_before.ledger_entry_changes)
+            if v3_compat.operations is not None:
+                for op_meta in v3_compat.operations:
+                    if op_meta.changes is not None:
+                        all_change_groups.append(op_meta.changes.ledger_entry_changes)
+            if v3_compat.tx_changes_after is not None:
+                all_change_groups.append(v3_compat.tx_changes_after.ledger_entry_changes)
+        else:
+            logger.warning("Unhandled TransactionMeta version: %d", meta.v)
 
     # Process each LedgerEntryChange
     for change_group in all_change_groups:
@@ -131,7 +145,7 @@ def _process_ledger_entry_change(
             }
 
     elif change_type == stellar_xdr.LedgerEntryChangeType.LEDGER_ENTRY_STATE:
-        # State entries are the "before" snapshot — useful for computing deltas
+        # State entries are the "before" snapshot - useful for computing deltas
         entry = change.state
         if entry is not None and entry.data.type == stellar_xdr.LedgerEntryType.OFFER:
             offer = entry.data.offer
@@ -248,6 +262,8 @@ class FillDetector:
             callback: Function called with a list of fill events for each tx.
             timeout: Maximum seconds to stream before stopping.
         """
+        # Manual SSE parsing instead of stellar-sdk streaming for full control
+        # over cursor management, reconnection logic, and async cancellation.
         self._running = True
         url = f"{HORIZON_URL}/accounts/{account_id}/transactions"
         params = {"cursor": "now", "order": "asc"}

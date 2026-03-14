@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Stellar SDEX Hummingbot Proof of Concept — Demo Script
+Stellar SDEX Hummingbot Proof of Concept - Demo Script
 
 Demonstrates core SDEX operations on the Stellar testnet:
 1. Account funding via Friendbot
@@ -82,7 +82,7 @@ async def main() -> None:
     tx_hashes: list[str] = []
 
     # --- Setup ---
-    separator("STELLAR SDEX PROOF OF CONCEPT — TESTNET DEMO")
+    separator("STELLAR SDEX PROOF OF CONCEPT - TESTNET DEMO")
 
     master_kp = load_keypair()
     print(f"Master public key:  {master_kp.public_key}")
@@ -122,7 +122,7 @@ async def main() -> None:
         print(f"Issuer funded. TX: {issuer_tx}")
     except Exception as exc:
         print(f"Could not fund issuer: {exc}")
-        print("Continuing without USDC — sell offers will still work.")
+        print("Continuing without USDC - sell offers will still work.")
         issuer_kp = None
 
     # Create the USDC asset with our issuer
@@ -319,7 +319,7 @@ async def main() -> None:
                 selling_asset=USDC,
                 buying_asset=XLM,
                 amount=Decimal("5"),
-                price=Decimal("0.30"),  # 0.30 USDC per XLM — below our sell at 0.50
+                price=Decimal("0.30"),  # 0.30 USDC per XLM - below our sell at 0.50
                 channel_keypair=ch2,
             )
             tx_hashes.append(buy_result["provisional_id"])
@@ -370,7 +370,7 @@ async def main() -> None:
                 base_fee=BASE_FEE,
             )
             builder.set_timeout(30)
-            # Taker buys 5 XLM at up to 0.60 USDC/XLM — this will cross
+            # Taker buys 5 XLM at up to 0.60 USDC/XLM - this will cross
             # master's sell at 0.50 and execute at 0.50 (price improvement)
             builder.append_operation(
                 ManageBuyOffer(
@@ -395,7 +395,7 @@ async def main() -> None:
         print("Skipping taker trade (missing prerequisites).")
 
     # ------------------------------------------------------------------
-    # Step 10: Fill detection — detect the trade that just happened
+    # Step 10: Fill detection - detect the trade that just happened
     # ------------------------------------------------------------------
     separator("STEP 10: Fill detection (detecting the taker's trade)")
 
@@ -419,40 +419,66 @@ async def main() -> None:
 
     if not fill_events:
         print("No fills detected via streaming (the trade may have landed before")
-        print("the stream connected — this is expected in a demo environment).")
+        print("the stream connected - this is expected in a demo environment).")
         if taker_fill_tx:
             print(f"\nThe fill IS confirmed on-chain: {taker_fill_tx}")
             print(f"  https://stellar.expert/explorer/testnet/tx/{taker_fill_tx}")
 
     # ------------------------------------------------------------------
-    # Step 11: Cancel remaining buy offer
+    # Step 11: Cancel remaining offers (cleanup)
     # ------------------------------------------------------------------
-    separator("STEP 11: Cancel remaining buy offer")
+    separator("STEP 11: Cancel remaining offers")
 
-    if buy_result and buy_result.get("offer_id"):
+    # Cancel the sell offer remainder (5 of 10 XLM were filled by taker)
+    if sell_result and sell_result.get("offer_id"):
         try:
             ch3 = await channel_mgr.acquire_channel()
-            cancel_result = order_mgr.cancel_offer(
-                offer_id=buy_result["offer_id"],
-                selling_asset=USDC,
-                buying_asset=XLM,
+            cancel_sell = order_mgr.cancel_offer(
+                offer_id=sell_result["offer_id"],
+                selling_asset=XLM,
+                buying_asset=USDC,
                 channel_keypair=ch3,
             )
-            if cancel_result.get("tx_hash"):
-                tx_hashes.append(cancel_result["tx_hash"])
-            print(f"Cancel result:")
-            print(f"  Status:   {cancel_result['status']}")
-            print(f"  TX hash:  {cancel_result.get('tx_hash', 'N/A')}")
-            print(f"  Offer ID: {cancel_result['offer_id']}")
+            if cancel_sell.get("tx_hash"):
+                tx_hashes.append(cancel_sell["tx_hash"])
+            print(f"Sell offer cancel:")
+            print(f"  Status:   {cancel_sell['status']}")
+            print(f"  TX hash:  {cancel_sell.get('tx_hash', 'N/A')}")
+            print(f"  Offer ID: {cancel_sell['offer_id']}")
             await channel_mgr.release_channel(ch3)
         except Exception as exc:
-            print(f"Cancel failed: {exc}")
+            print(f"Sell offer cancel failed: {exc}")
             try:
                 await channel_mgr.release_channel(ch3)
             except Exception:
                 pass
-    else:
-        print("No buy offer to cancel.")
+
+    # Cancel the buy offer (unfilled)
+    if buy_result and buy_result.get("offer_id"):
+        try:
+            ch4 = await channel_mgr.acquire_channel()
+            cancel_buy = order_mgr.cancel_offer(
+                offer_id=buy_result["offer_id"],
+                selling_asset=USDC,
+                buying_asset=XLM,
+                channel_keypair=ch4,
+            )
+            if cancel_buy.get("tx_hash"):
+                tx_hashes.append(cancel_buy["tx_hash"])
+            print(f"Buy offer cancel:")
+            print(f"  Status:   {cancel_buy['status']}")
+            print(f"  TX hash:  {cancel_buy.get('tx_hash', 'N/A')}")
+            print(f"  Offer ID: {cancel_buy['offer_id']}")
+            await channel_mgr.release_channel(ch4)
+        except Exception as exc:
+            print(f"Buy offer cancel failed: {exc}")
+            try:
+                await channel_mgr.release_channel(ch4)
+            except Exception:
+                pass
+
+    if not (sell_result and sell_result.get("offer_id")) and not (buy_result and buy_result.get("offer_id")):
+        print("No offers to cancel.")
 
     # ------------------------------------------------------------------
     # Step 12: Channel replenishment check

@@ -70,7 +70,7 @@ def _parse_offer_id_from_result(result_xdr: str) -> Optional[int]:
             if offer_entry is not None:
                 return offer_entry.offer_id.int64
             else:
-                # Offer was immediately filled or deleted — check offers_claimed
+                # Offer was immediately filled or deleted - check offers_claimed
                 return None
 
     except Exception as exc:
@@ -104,10 +104,11 @@ def _check_available_balance(server: Server, account_id: str, asset: Asset) -> D
                 native_balance = stellar_amount_to_decimal(bal["balance"])
                 break
 
-        # Calculate reserves: base reserve (1 XLM) + 0.5 per subentry
+        # Minimum balance = (2 + num_subentries) * base_reserve
+        # base_reserve is 0.5 XLM on current mainnet
         num_subentries = acct_info.get("subentry_count", 0)
-        base_reserve = Decimal("1")
-        reserved = base_reserve + Decimal("0.5") * num_subentries
+        base_reserve = Decimal("0.5")
+        reserved = (2 + num_subentries) * base_reserve
         available = native_balance - reserved
         return max(available, Decimal("0"))
     else:
@@ -342,7 +343,7 @@ class OrderManager:
             return {"tx_hash": tx_hash, "status": "cancelled", "offer_id": offer_id}
         except Exception as exc:
             error_str = str(exc)
-            # Handle "offer not found" gracefully — it may have already been
+            # Handle "offer not found" gracefully - it may have already been
             # filled or cancelled
             if "op_not_found" in error_str or "MANAGE_SELL_OFFER_NOT_FOUND" in error_str:
                 logger.info(

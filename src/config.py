@@ -29,7 +29,7 @@ BASE_FEE = 100  # stroops
 # ---------------------------------------------------------------------------
 XLM = Asset.native()
 
-# USDC is created dynamically on testnet — there is no canonical issuer.
+# USDC is created dynamically on testnet - there is no canonical issuer.
 # The demo creates its own issuer account and mints test USDC.
 # This variable is set at runtime by demo.py after issuer creation.
 USDC = None

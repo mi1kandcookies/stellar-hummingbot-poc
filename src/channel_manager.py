@@ -73,7 +73,7 @@ class ChannelManager:
             async with session.get(url) as resp:
                 result = await resp.json()
                 if resp.status != 200:
-                    # Friendbot may return 400 if already funded — that's OK
+                    # Friendbot may return 400 if already funded - that's OK
                     if "already exists" in str(result).lower() or "createAccountAlreadyExist" in str(result):
                         logger.info("Master account already funded")
                         return "already_funded"
@@ -194,7 +194,7 @@ class ChannelManager:
                         top_up = REPLENISH_TARGET - native_balance
                         channels_to_fund.append((ch_kp, top_up))
                         logger.info(
-                            "Channel %s balance %.2f XLM — needs replenishment of %.2f",
+                            "Channel %s balance %.2f XLM - needs replenishment of %.2f",
                             ch_kp.public_key[:8],
                             native_balance,
                             top_up,

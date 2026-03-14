@@ -10,7 +10,7 @@ from decimal import Decimal, ROUND_DOWN, getcontext
 from stellar_sdk import Asset
 
 # ---------------------------------------------------------------------------
-# Decimal context — Stellar uses 7 decimal places
+# Decimal context - Stellar uses 7 decimal places
 # ---------------------------------------------------------------------------
 STELLAR_PRECISION = 7
 STROOP_MULTIPLIER = Decimal("10000000")  # 10^7
