@@ -7,7 +7,7 @@
   <script>
     (function () {
       var path = window.location.pathname;
-      var target = path.replace(/\/full_technical_architecture\/?$/, "/full-technical-architecture.html");
+      var target = path.replace(/\/full_technical_architecture(?:\.html)?\/?$/, "/full-technical-architecture.html");
       if (target !== path) {
         window.location.replace(target + window.location.search + window.location.hash);
       }
