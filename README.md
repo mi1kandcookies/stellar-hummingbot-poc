@@ -1,6 +1,6 @@
 # Stellar SDEX Hummingbot Proof of Concept
 
-A standalone Python proof-of-concept demonstrating core Stellar SDEX operations on testnet. Built as part of the Stellar Hummingbot SDEX Connector proposal for the SCF Build Award.
+A standalone Python proof-of-concept demonstrating core Stellar SDEX operations on testnet. 
 
 ## What This Demonstrates
 
