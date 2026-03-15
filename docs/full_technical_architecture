@@ -998,7 +998,7 @@ available_USDC = total_USDC - usdc.selling_liabilities</pre>
     <h2>9. Error Handling</h2>
   </div>
 
-  <p>All error codes come from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code>, both typed Python enums.</p>
+  <p>All error codes come from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code>, both typed Python enums. No string comparisons.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Error Handling Flow</div>

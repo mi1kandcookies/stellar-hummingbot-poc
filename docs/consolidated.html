@@ -343,7 +343,7 @@
     <dt>Version:</dt> <dd>2.0</dd>
     <dt>Date:</dt> <dd>March 14, 2026</dd>
     <dt>Authors:</dt> <dd>Tharun Ekambaram &amp; Daniel Zilper</dd>
-    <dt>Full Document:</dt> <dd><a href="index.html">14-Section Technical Architecture</a></dd>
+    <dt>Full Document:</dt> <dd><a href="full_technical_architecture">14-Section Technical Architecture</a></dd>
     <dt>Testnet Prototype:</dt> <dd><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc">GitHub Repository</a></dd>
   </dl>
 </div>
@@ -381,7 +381,7 @@
 flowchart TD
     TRADER["Trader"]
 
-    subgraph HB["Hummingbot Process - Python"]
+    subgraph HB["Hummingbot Process (Python)"]
         STRAT["Strategy Layer\npure_market_making / avellaneda_market_making"]
         EXCH["StellarExchange\nExchangePyBase subclass"]
         OBT["OrderBookTracker"]
@@ -538,7 +538,7 @@ sequenceDiagram
     RPC-->>SE: PENDING
     SE-->>HB: return tx_hash as exchange_order_id
     Note over HB: InFlightOrder tracked by tx_hash
-    Note over RPC: 5-7 seconds - ledger closes
+    Note over RPC: 5 to 7 seconds (ledger closes)
     US->>SE: Horizon SSE transaction event
     SE->>SE: Parse result_xdr for offer_id
     SE->>HB: OrderUpdate with real offer_id and state OPEN
@@ -548,10 +548,10 @@ sequenceDiagram
 
   <h3>Buy vs Sell Balance Locking</h3>
   <pre>
-SELL order - ManageSellOffer(selling=XLM):
+SELL order: ManageSellOffer(selling=XLM)
   Required:  available_XLM >= order_amount
 
-BUY order - ManageBuyOffer(selling=USDC to buy XLM):
+BUY order: ManageBuyOffer(selling=USDC to buy XLM)
   Required:  available_USDC >= (order_amount x price)</pre>
 </section>
 
@@ -581,7 +581,7 @@ flowchart TD
     RESUME["Resume with cursor=now"]
 
     SSE --> PARSE --> OUR
-    OUR -- "yes - our submission" --> OURS_YES
+    OUR -- "yes (our submission)" --> OURS_YES
     OUR -- "no" --> OURS_NO --> FOUND
     FOUND -- "yes" --> EMIT
     FOUND -- "no" --> IGN
@@ -604,18 +604,18 @@ flowchart TD
 
   <h3>XDR Parsing Details</h3>
   <ul>
-    <li><code>TransactionMeta</code> versions 0-4 are all handled for protocol compatibility</li>
-    <li>Created/Updated entries are <code>LedgerEntry</code> objects (access via <code>.data.type</code>)</li>
-    <li>Removed entries are <code>LedgerKey</code> objects (access directly via <code>.type</code> (no <code>.data</code> wrapper)</li>
+    <li><code>TransactionMeta</code> versions 0 to 4 are all handled for protocol compatibility.</li>
+    <li>Created and updated entries are <code>LedgerEntry</code> objects (access via <code>.data.type</code>).</li>
+    <li>Removed entries are <code>LedgerKey</code> objects (access directly via <code>.type</code>; no <code>.data</code> wrapper).</li>
     <li><code>OfferEntry.amount</code> is always in the selling asset. For buy orders, divide by price to get base amount</li>
   </ul>
 
   <pre>
-# CREATED or UPDATED - LedgerEntry
+# CREATED or UPDATED: LedgerEntry
 if change.created.data.type == LedgerEntryType.OFFER:
     offer = change.created.data.offer    # OfferEntry
 
-# REMOVED - LedgerKey (no .data wrapper)
+# REMOVED: LedgerKey (no .data wrapper)
 if change.removed.type == LedgerEntryType.OFFER:
     offer_id = str(change.removed.offer.offer_id)</pre>
 
@@ -789,9 +789,9 @@ flowchart LR
     <table>
       <thead><tr><th>Step</th><th>RPC Call</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>1 - Simulate</td><td><code>simulateTransaction</code></td><td>Returns the required footprint (ledger keys to read/write) and resource fee estimate</td></tr>
-        <tr><td>2 - Assemble</td><td><code>assembleTransaction</code></td><td>Attaches the footprint and resource limits to the transaction</td></tr>
-        <tr><td>3 - Submit</td><td><code>sendTransaction</code></td><td>Signs and broadcasts the fully assembled transaction</td></tr>
+        <tr><td>1. Simulate</td><td><code>simulateTransaction</code></td><td>Returns the required footprint (ledger keys to read/write) and resource fee estimate.</td></tr>
+        <tr><td>2. Assemble</td><td><code>assembleTransaction</code></td><td>Attaches the footprint and resource limits to the transaction.</td></tr>
+        <tr><td>3. Submit</td><td><code>sendTransaction</code></td><td>Signs and broadcasts the fully assembled transaction.</td></tr>
       </tbody>
     </table>
   </div>
