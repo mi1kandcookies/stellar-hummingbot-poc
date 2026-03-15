@@ -98,7 +98,7 @@ Key transactions:
 ## Technical Documentation
 
 - [Consolidated Technical Architecture](https://mi1kandcookies.github.io/stellar-hummingbot-poc/consolidated.html) - Key diagrams and decisions (10 sections)
-- [Full Technical Architecture](https://mi1kandcookies.github.io/stellar-hummingbot-poc/full_technical_architecture) - Complete 14-section reference
+- [Full Technical Architecture](https://mi1kandcookies.github.io/stellar-hummingbot-poc/full_technical_architecture.html) - Complete 14-section reference
 
 ## License
 
