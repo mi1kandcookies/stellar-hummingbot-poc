@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Page Not Found</title>
+  <script>
+    (function () {
+      var path = window.location.pathname;
+      var target = path.replace(/\/full_technical_architecture\/?$/, "/full-technical-architecture.html");
+      if (target !== path) {
+        window.location.replace(target + window.location.search + window.location.hash);
+      }
+    })();
+  </script>
+</head>
+<body>
+  <p>Page not found. Go to <a href="./">index</a>.</p>
+</body>
+</html>
