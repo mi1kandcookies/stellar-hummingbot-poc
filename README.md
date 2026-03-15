@@ -95,11 +95,6 @@ Key transactions:
 | 12 | Cancel sell offer remainder | [View](https://stellar.expert/explorer/testnet/tx/0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5) |
 | 13 | Cancel buy offer | [View](https://stellar.expert/explorer/testnet/tx/82d432c793d037f8742137b2495651d4f469fdb1ed604f54f4776d03c0150751) |
 
-## Technical Documentation
-
-- [Consolidated Technical Architecture](https://mi1kandcookies.github.io/stellar-hummingbot-poc/consolidated.html) - Key diagrams and decisions (10 sections)
-- [Full Technical Architecture](https://mi1kandcookies.github.io/stellar-hummingbot-poc/full-technical-architecture.html) - Complete 14-section reference
-
 ## License
 
 MIT
