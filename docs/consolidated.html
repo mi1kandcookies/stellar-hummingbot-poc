@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Stellar SDEX Hummingbot Connector - Consolidated Technical Architecture</title>
+  <title>Stellar SDEX Hummingbot Connector — Consolidated Technical Architecture</title>
   <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -338,7 +338,7 @@
 
 <div class="doc-header">
   <h1>Stellar SDEX Hummingbot Connector</h1>
-  <p class="doc-subtitle">Consolidated Technical Architecture. Key architectural decisions and diagrams. Each section cites the full architecture document for deeper detail.</p>
+  <p class="doc-subtitle">Consolidated Technical Architecture</p>
   <dl class="doc-meta">
     <dt>Version:</dt> <dd>2.0</dd>
     <dt>Date:</dt> <dd>March 14, 2026</dd>
@@ -373,7 +373,7 @@
   </div>
   <span class="ref-link">Full document: Section 1 - Executive Summary</span>
 
-  <p>The connector runs natively inside Hummingbot as a Python <code>ExchangePyBase</code> subclass. No Gateway, no Docker, no middleware. Writes go through Stellar RPC. Reads go through Horizon.</p>
+  <p>The connector runs natively inside Hummingbot as a Python <code>ExchangePyBase</code> subclass, requiring no Gateway, Docker containers, or middleware. Transaction writes go through Stellar RPC, and market data reads go through Horizon.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">System Architecture</div>
@@ -421,7 +421,7 @@ flowchart TD
   </div>
 
   <div class="callout callout-info">
-    <p><strong>Why RPC for writes, Horizon for reads?</strong> The RFP notes the connector should ideally use Stellar RPC. We use RPC for all write operations (sendTransaction, getTransaction, getNetwork). For orderbook reads, Stellar RPC has no endpoint for OfferEntry records - the persistent ledger state that makes up the SDEX orderbook. Horizon is the only production-ready API for this data. The market data layer is abstracted behind a single interface so it can migrate to Portfolio APIs or any future RPC orderbook endpoint without touching the rest of the connector.</p>
+    <p><strong>Why RPC for writes, Horizon for reads?</strong> The RFP notes the connector should ideally use Stellar RPC. The connector uses RPC for all write operations (<code>sendTransaction</code>, <code>getTransaction</code>, <code>getNetwork</code>). For orderbook reads, Stellar RPC has no endpoint for <code>OfferEntry</code> records — the persistent ledger state that comprises the SDEX orderbook. Horizon is the only production-ready API for this data. The market data layer is abstracted behind a single interface so it can migrate to Portfolio APIs or any future RPC orderbook endpoint without touching the rest of the connector.</p>
   </div>
 </section>
 
@@ -459,7 +459,7 @@ sequenceDiagram
     </div>
   </div>
 
-  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5" target="_blank">Testnet TX 9: Sell offer - note two signers (channel + master)</a>
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5" target="_blank">Testnet TX 9: Sell offer — note two signers (channel + master)</a>
 </section>
 
 <!-- 3 -->
@@ -505,7 +505,7 @@ flowchart TD
     <li>Channels are funded at 2.0 XLM, replenished when they drop below 1.5 XLM</li>
     <li>All replenishments go into a single multi-operation transaction (one sequence number, one fee)</li>
     <li>If the main account's available XLM is insufficient, the provisioner logs a warning and skips the cycle</li>
-    <li>Sequence numbers are tracked locally - no network round-trip before each submission</li>
+    <li>Sequence numbers are tracked locally — no network round-trip before each submission</li>
     <li>On sequence error, the local value is invalidated and re-fetched automatically</li>
   </ul>
 
@@ -519,7 +519,7 @@ flowchart TD
   </div>
   <span class="ref-link">Full document: Section 6 - Order Placement (6.1-6.4)</span>
 
-  <p>Stellar generates offer IDs after a transaction confirms on the ledger. We use the transaction hash as a provisional ID immediately, then swap it for the real offer ID once the transaction lands.</p>
+  <p>Stellar generates offer IDs after a transaction confirms on the ledger. The connector uses the transaction hash as a provisional ID immediately, then swaps it for the real offer ID once the transaction lands.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Two-Phase Order ID Resolution</div>
@@ -606,7 +606,7 @@ flowchart TD
   <ul>
     <li><code>TransactionMeta</code> versions 0-4 are all handled for protocol compatibility</li>
     <li>Created/Updated entries are <code>LedgerEntry</code> objects (access via <code>.data.type</code>)</li>
-    <li>Removed entries are <code>LedgerKey</code> objects (access directly via <code>.type</code> - no <code>.data</code> wrapper)</li>
+    <li>Removed entries are <code>LedgerKey</code> objects (access directly via <code>.type</code> — no <code>.data</code> wrapper)</li>
     <li><code>OfferEntry.amount</code> is always in the selling asset. For buy orders, divide by price to get base amount</li>
   </ul>
 
@@ -628,7 +628,7 @@ BUY order (selling=USDC):
   remaining_quote = offer_entry.amount / 10_000_000
   remaining_base  = remaining_quote / order_price</pre>
 
-  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992" target="_blank">Testnet TX 11: Taker crosses sell offer - produces LedgerEntryChange pattern</a>
+  <a class="evidence-link" href="https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992" target="_blank">Testnet TX 11: Taker crosses sell offer — produces LedgerEntryChange pattern</a>
 </section>
 
 <!-- 6 -->
@@ -638,9 +638,9 @@ BUY order (selling=USDC):
   </div>
   <span class="ref-link">Full document: Section 4.2 - Horizon, The Read Path</span>
 
-  <p>The SDEX orderbook is made up of <code>OfferEntry</code> records sitting in the ledger as persistent state. There is no event stream that can reconstruct it. Horizon's <code>/order_book</code> endpoint is the only public API that reads it directly.</p>
+  <p>The SDEX orderbook comprises <code>OfferEntry</code> records stored in the ledger as persistent state. No event stream provides the data necessary to reconstruct it. Horizon's <code>/order_book</code> endpoint is the only public API that reads it directly.</p>
 
-  <p>Each SSE event from Horizon's <code>/order_book</code> stream delivers a complete orderbook snapshot for both bid and ask sides - not an incremental diff. On reconnection, the data source performs a full GET request to re-establish baseline state before resuming the SSE stream.</p>
+  <p>Each SSE event from Horizon's <code>/order_book</code> stream delivers a complete orderbook snapshot for both bid and ask sides — not an incremental diff. On reconnection, the data source performs a full GET request to re-establish baseline state before resuming the SSE stream.</p>
 
   <div class="table-wrap">
     <table>
@@ -672,7 +672,7 @@ available_XLM = total_XLM
 
 available_USDC = total_USDC - usdc.selling_liabilities</pre>
 
-  <p>All values from Horizon are strings. Always use <code>Decimal(balance["balance"])</code> - never <code>float()</code>. Status polling uses a single batched call to <code>/accounts/id/offers</code> for all open orders rather than one request per order.</p>
+  <p>All values from Horizon are strings. Always use <code>Decimal(balance["balance"])</code> — never <code>float()</code>. Status polling uses a single batched call to <code>/accounts/id/offers</code> for all open orders rather than one request per order.</p>
 </section>
 
 <!-- 8 -->
@@ -735,7 +735,7 @@ flowchart TD
     </div>
   </div>
 
-  <p>Every error code comes from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code> - typed Python enums. No string comparisons. Sequence and fee errors are retried automatically. Balance and unknown errors are surfaced to the strategy.</p>
+  <p>Every error code comes from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code> — typed Python enums, with no string comparisons. Sequence and fee errors are retried automatically. Balance and unknown errors are surfaced to the strategy.</p>
 </section>
 
 <!-- 9 -->
@@ -789,9 +789,9 @@ flowchart LR
     <table>
       <thead><tr><th>Step</th><th>RPC Call</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>1 - Simulate</td><td>simulateTransaction</td><td>Returns the required footprint (ledger keys to read/write) and resource fee estimate</td></tr>
-        <tr><td>2 - Assemble</td><td>assembleTransaction</td><td>Attaches the footprint and resource limits to the transaction</td></tr>
-        <tr><td>3 - Submit</td><td>sendTransaction</td><td>Signs and broadcasts the fully assembled transaction</td></tr>
+        <tr><td>1 - Simulate</td><td><code>simulateTransaction</code></td><td>Returns the required footprint (ledger keys to read/write) and resource fee estimate</td></tr>
+        <tr><td>2 - Assemble</td><td><code>assembleTransaction</code></td><td>Attaches the footprint and resource limits to the transaction</td></tr>
+        <tr><td>3 - Submit</td><td><code>sendTransaction</code></td><td>Signs and broadcasts the fully assembled transaction</td></tr>
       </tbody>
     </table>
   </div>
@@ -810,12 +810,12 @@ flowchart LR
       <thead><tr><th>Capability</th><th>What It Proves</th><th>Transaction</th></tr></thead>
       <tbody>
         <tr><td>Channel account batching</td><td>Single tx creates 3 channels at 2.0 XLM each</td><td><a href="https://stellar.expert/explorer/testnet/tx/bd58b663a8d2952a22e59030657a61f71f4b9086e834fbdc15f9c8389c050afe" target="_blank">TX 8</a></td></tr>
-        <tr><td>ManageSellOffer via channel</td><td>Channel as tx source, master as op source, offer ID from XDR</td><td><a href="https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5" target="_blank">TX 9</a></td></tr>
-        <tr><td>ManageBuyOffer via channel</td><td>Same pattern, different channel, parallel submission</td><td><a href="https://stellar.expert/explorer/testnet/tx/90174e7aae2cf4c04a6bb102499f2b171e03d34cea61bba0ffb12f0e30d13f68" target="_blank">TX 10</a></td></tr>
+        <tr><td><code>ManageSellOffer</code> via channel</td><td>Channel as tx source, master as op source, offer ID from XDR</td><td><a href="https://stellar.expert/explorer/testnet/tx/127b8c5d35cbfca2e0c4a992b10cf51de6a48f87135caefef84c67f8ddbe91f5" target="_blank">TX 9</a></td></tr>
+        <tr><td><code>ManageBuyOffer</code> via channel</td><td>Same pattern, different channel, parallel submission</td><td><a href="https://stellar.expert/explorer/testnet/tx/90174e7aae2cf4c04a6bb102499f2b171e03d34cea61bba0ffb12f0e30d13f68" target="_blank">TX 10</a></td></tr>
         <tr><td>Two-party SDEX trade</td><td>Independent taker crosses master's sell at maker's price</td><td><a href="https://stellar.expert/explorer/testnet/tx/4a2dba88282a6e11157bfe200f3cfa399ff87eae94d53a5c953c3b58e69d8992" target="_blank">TX 11</a></td></tr>
-        <tr><td>Offer cancellation</td><td>ManageSellOffer(amount=0), graceful already-gone handling</td><td><a href="https://stellar.expert/explorer/testnet/tx/0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5" target="_blank">TX 12</a></td></tr>
+        <tr><td>Offer cancellation</td><td><code>ManageSellOffer(amount=0)</code>, graceful already-gone handling</td><td><a href="https://stellar.expert/explorer/testnet/tx/0fe4aa22c1dc5fd49af43844b5fffc24b66b81a1f3f6b6451d2abe78b600ccd5" target="_blank">TX 12</a></td></tr>
         <tr><td>Asset lifecycle</td><td>Trustline setup, USDC issuance, cross-account payments</td><td>TX 3-7</td></tr>
-        <tr><td>XDR parsing</td><td>TransactionMeta v0-v3, LedgerEntry vs LedgerKey</td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/fill_detector.py" target="_blank">fill_detector.py</a></td></tr>
+        <tr><td>XDR parsing</td><td><code>TransactionMeta</code> v0-v3, <code>LedgerEntry</code> vs <code>LedgerKey</code></td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/fill_detector.py" target="_blank">fill_detector.py</a></td></tr>
         <tr><td>Reserve-aware balance checks</td><td>Base reserve + subentries + selling_liabilities</td><td><a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc/blob/main/src/order_manager.py" target="_blank">order_manager.py</a></td></tr>
       </tbody>
     </table>
@@ -830,9 +830,8 @@ flowchart LR
 </div>
 
 <footer>
-  Stellar SDEX Hummingbot Connector - Consolidated Technical Architecture v2.0 |
-  <a href="index.html">Full Architecture Document</a> |
-  <a href="https://github.com/mi1kandcookies/stellar-hummingbot-poc">Testnet Prototype</a>
+  Stellar SDEX Hummingbot Connector — Consolidated Technical Architecture v2.0<br/>
+  Tharun Ekambaram &amp; Daniel Zilper
 </footer>
 
 </body>

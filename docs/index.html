@@ -409,7 +409,7 @@
 
 <div class="doc-header">
   <h1>Stellar SDEX Hummingbot Connector</h1>
-  <p class="doc-subtitle">Technical Architecture Document. A complete reference for how this connector is built, why each decision was made, and how everything fits together.</p>
+  <p class="doc-subtitle">Technical Architecture Document</p>
   <dl class="doc-meta">
     <dt>Version:</dt> <dd>2.0</dd>
     <dt>Date:</dt> <dd>March 14, 2026</dd>
@@ -433,7 +433,7 @@
     <li><a href="#balance">Balance Management</a></li>
     <li><a href="#errors">Error Handling</a></li>
     <li><a href="#startup">Network Validation at Startup</a></li>
-    <li><a href="#amm">AMM Integration - Phase 2</a></li>
+    <li><a href="#amm">AMM Integration — Phase 2</a></li>
     <li><a href="#hummingbot">Hummingbot Integration Contract</a></li>
     <li><a href="#security">Security</a></li>
     <li><a href="#decisions">Key Design Decisions</a></li>
@@ -448,7 +448,7 @@
     <h2>1. Executive Summary</h2>
   </div>
 
-  <p>This connector integrates the Stellar DEX with Hummingbot as a direct Python <code>ExchangePyBase</code> subclass -the same pattern the XRPL connector uses. It runs inside the Hummingbot process. There is no external server, no extra Docker container, and no middleware. That setup is required for the connector to be officially merged into the Hummingbot repository and maintained alongside everything else in the codebase.</p>
+  <p>This connector integrates the Stellar DEX with Hummingbot as a direct Python <code>ExchangePyBase</code> subclass, following the same pattern the XRPL connector uses. It runs inside the Hummingbot process. There is no external server, no extra Docker container, and no middleware. This integration model is required for the connector to be officially merged into the Hummingbot repository and maintained alongside the existing connector ecosystem.</p>
 
   <p>The table below covers the five main architectural calls and the reasoning behind each one.</p>
 
@@ -456,13 +456,13 @@
     <div class="decision-header">Decision</div>
     <div class="decision-header">Rationale</div>
     <div class="decision-row-label">Direct Python connector</div>
-    <div class="decision-row-value">Hummingbot requires an ExchangePyBase subclass for official inclusion. The Stellar Python SDK covers everything -no JavaScript runtime needed.</div>
+    <div class="decision-row-value">Hummingbot requires an ExchangePyBase subclass for official inclusion. The Stellar Python SDK covers everything, eliminating the need for a JavaScript runtime.</div>
     <div class="decision-row-label">Stellar RPC for writes</div>
     <div class="decision-row-value">sendTransaction and getTransaction are the correct interfaces for transaction submission and confirmation. This is what they are built for.</div>
     <div class="decision-row-label">Horizon SSE for reads</div>
     <div class="decision-row-value">The SDEX orderbook is persistent OfferEntry ledger state. No event stream can reconstruct it. Horizon's /order_book endpoint is the only public API that reads it directly.</div>
     <div class="decision-row-label">Channel accounts</div>
-    <div class="decision-row-value">Stellar enforces one transaction per account per ledger. A market maker refreshing a spread needs many simultaneous transactions -channel accounts solve this at the protocol level.</div>
+    <div class="decision-row-value">Stellar enforces one transaction per account per ledger. A market maker refreshing a spread needs many simultaneous transactions; channel accounts solve this at the protocol level.</div>
     <div class="decision-row-label">Two-phase offer ID</div>
     <div class="decision-row-value">Stellar generates offer IDs at the ledger level after a transaction confirms. The transaction hash serves as a temporary ID until the real one is available.</div>
   </div>
@@ -519,7 +519,7 @@ flowchart TD
     <h2>2. Technology Stack</h2>
   </div>
 
-  <p>The dependency surface is intentionally small. The <code>stellar-sdk</code> handles XDR encoding and transaction construction. All network calls use <code>aiohttp</code> directly with persistent sessions -not the SDK's built-in HTTP client. This avoids async compatibility issues between the SDK and Hummingbot's event loop, and gives us full control over connection pooling.</p>
+  <p>The <code>stellar-sdk</code> handles XDR encoding and transaction construction. All network calls use <code>aiohttp</code> directly with persistent sessions rather than the SDK's built-in HTTP client, avoiding async compatibility issues between the SDK and Hummingbot's event loop and providing full control over connection pooling.</p>
 
   <div class="table-wrap">
     <table>
@@ -527,17 +527,17 @@ flowchart TD
         <tr><th>Layer</th><th>Technology</th><th>Why</th></tr>
       </thead>
       <tbody>
-        <tr><td>Trading framework</td><td>Python 3.10+, Hummingbot</td><td>Strategy execution and connector interface</td></tr>
-        <tr><td>Network I/O</td><td>aiohttp 3.x</td><td>All HTTP and SSE connections. Persistent sessions -no new TCP handshake per request</td></tr>
-        <tr><td>Transaction construction</td><td>stellar-sdk 10.0.0+</td><td>XDR encoding, keypair management, operation building only. Not used for networking.</td></tr>
-        <tr><td>Decimal arithmetic</td><td>Python decimal.Decimal</td><td>Every monetary value. Never float -floating-point rounding errors in financial math compound over time.</td></tr>
-        <tr><td>Async timeout</td><td>async_timeout package</td><td>asyncio.timeout was added in Python 3.11. Hummingbot targets 3.10+, so we use the backport.</td></tr>
+        <tr><td>Trading framework</td><td>Python 3.10+, Hummingbot</td><td>Hummingbot provides strategy execution, order management, and the <code>ExchangePyBase</code> connector interface that this module implements</td></tr>
+        <tr><td>Network I/O</td><td>aiohttp 3.x</td><td>Handles all HTTP and SSE connections with persistent sessions, eliminating per-request TCP handshake overhead</td></tr>
+        <tr><td>Transaction construction</td><td>stellar-sdk 10.0.0+</td><td>Used exclusively for XDR encoding, keypair management, and operation construction — not for networking</td></tr>
+        <tr><td>Decimal arithmetic</td><td>Python decimal.Decimal</td><td>All monetary values use fixed-point arithmetic. Floating-point rounding errors in financial calculations compound across thousands of transactions</td></tr>
+        <tr><td>Async timeout</td><td>async_timeout package</td><td>Provides <code>asyncio.timeout</code> compatibility for Python 3.10, which Hummingbot requires as its minimum version</td></tr>
       </tbody>
     </table>
   </div>
 
   <div class="callout callout-warning">
-    <p><strong>stellar-sdk version matters.</strong> TransactionMetaV4 -what Protocol 23 mainnet produces -requires stellar-sdk 10.0.0 or higher. Earlier versions silently fail to parse transaction metadata. The connector checks the SDK version at startup and raises a clear error if it is too old.</p>
+    <p><strong>stellar-sdk version requirement.</strong> TransactionMetaV4, the format Protocol 23 mainnet produces, requires stellar-sdk 10.0.0 or higher. Earlier versions silently fail to parse transaction metadata. The connector validates the SDK version at startup and raises an error if the installed version is below this threshold.</p>
   </div>
 </section>
 
@@ -547,11 +547,11 @@ flowchart TD
     <h2>3. File Structure</h2>
   </div>
 
-  <p>Every file has a single job. The main connector in <code>stellar_exchange.py</code> implements the abstract methods Hummingbot requires and orchestrates everything else.</p>
+  <p>The connector is organized as a single Python package within Hummingbot's exchange connector directory. The main connector class in <code>stellar_exchange.py</code> implements all abstract methods required by <code>ExchangePyBase</code> and delegates to specialized modules for channel management, XDR parsing, market data streaming, and network communication. Each module corresponds to a distinct architectural concern described in the sections that follow.</p>
 
   <div class="file-tree">
     <span class="dir">hummingbot/connector/exchange/stellar/</span><br/>
-    ├── <span class="file-main">stellar_exchange.py</span>&nbsp;&nbsp;&nbsp;<span class="comment"># ExchangePyBase subclass -the main connector</span><br/>
+    ├── <span class="file-main">stellar_exchange.py</span>&nbsp;&nbsp;&nbsp;<span class="comment"># ExchangePyBase subclass — the main connector</span><br/>
     ├── stellar_auth.py&nbsp;&nbsp;&nbsp;<span class="comment"># Ed25519 keypair management</span><br/>
     ├── stellar_channel_manager.py&nbsp;&nbsp;&nbsp;<span class="comment"># Channel pool and fee provisioner</span><br/>
     ├── stellar_api_order_book_data_source.py&nbsp;&nbsp;&nbsp;<span class="comment"># Horizon SSE order book</span><br/>
@@ -572,11 +572,11 @@ flowchart TD
     <h2>4. Transport Layer</h2>
   </div>
 
-  <p>The connector uses two separate transport mechanisms -Stellar RPC for writing, Horizon for reading. This is not a workaround. It reflects what each API is actually built to do.</p>
+  <p>The connector uses two separate transport mechanisms: Stellar RPC for transaction submission, and Horizon for market data and account state. This separation follows the design intent of each API — Stellar RPC exposes the JSON-RPC 2.0 interface required for submitting and confirming transactions, while Horizon provides REST and SSE access to ledger state including the SDEX orderbook.</p>
 
-  <h3>4.1 Stellar RPC -The Write Path</h3>
+  <h3>4.1 Stellar RPC — The Write Path</h3>
 
-  <p>Every transaction goes through Stellar's JSON-RPC 2.0 interface. When we submit a transaction, we get a <code>PENDING</code> status back and then poll <code>getTransaction</code> until it confirms or fails. The polling interval is three seconds with a maximum of 210 seconds -just beyond the 180-second transaction timeout, so we never stop watching before the transaction can possibly expire.</p>
+  <p>Every transaction goes through Stellar's JSON-RPC 2.0 interface. Upon submitting a transaction, the response includes a <code>PENDING</code> status, after which <code>getTransaction</code> is polled until the transaction confirms or fails. The polling interval is three seconds with a maximum of 210 seconds, just beyond the 180-second transaction timeout, so polling continues until the transaction has either confirmed or expired.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Transaction Submission Flow</div>
@@ -603,15 +603,15 @@ sequenceDiagram
     </div>
   </div>
 
-  <h3>4.2 Horizon -The Read Path</h3>
+  <h3>4.2 Horizon — The Read Path</h3>
 
-  <p>The SDEX orderbook is made up of OfferEntry records sitting in the ledger as persistent state. An offer placed six months ago is still a valid open order today. There is no event that fires when it was created -it just exists. That means you cannot reconstruct the current orderbook from a transaction or event feed. You have to read it directly from the ledger, and Horizon's <code>/order_book</code> endpoint is the only public API that does this.</p>
+  <p>The SDEX orderbook is made up of OfferEntry records sitting in the ledger as persistent state. An offer placed six months ago is still a valid open order today. No event is emitted when an offer is created or modified — the current state is the only record. Consequently, the orderbook cannot be reconstructed from a transaction or event feed. It must be read directly from the ledger, and Horizon's <code>/order_book</code> endpoint is the only public API that exposes this data.</p>
 
   <div class="callout callout-info">
     <p><strong>Why not Stellar RPC for the orderbook?</strong> Stellar RPC is purpose-built for Soroban smart contract interactions. It has no endpoint for reading classic OfferEntry records from the BucketList. When Portfolio APIs add orderbook support, the connector's market data layer is abstracted behind a single interface that makes the switch a one-file change.</p>
   </div>
 
-  <p>Each SSE event from Horizon's <code>/order_book</code> stream delivers a complete orderbook snapshot for both bid and ask sides -not an incremental diff. On reconnection, the data source performs a full GET request to re-establish baseline state before resuming the SSE stream. There is no incremental delta to reconcile.</p>
+  <p>Each SSE event from Horizon's <code>/order_book</code> stream delivers a complete orderbook snapshot for both bid and ask sides, not an incremental diff. On reconnection, the data source performs a full GET request to re-establish baseline state before resuming the SSE stream. There is no incremental delta to reconcile.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Market Data and Fill Detection</div>
@@ -658,9 +658,9 @@ flowchart LR
         <tr><td>/order_book</td><td>GET and SSE</td><td>Orderbook snapshot and per-ledger streaming</td></tr>
         <tr><td>/accounts/id/transactions</td><td>SSE</td><td>Fill detection via account transaction stream</td></tr>
         <tr><td>/accounts/id</td><td>GET</td><td>Account balances and subentry count</td></tr>
-        <tr><td>/accounts/id/offers</td><td>GET</td><td>Open offer count for reserve calculation -batched for all orders</td></tr>
+        <tr><td>/accounts/id/offers</td><td>GET</td><td>Open offer count for reserve calculation (batched across all orders)</td></tr>
         <tr><td>/accounts/id/trades</td><td>GET</td><td>Last traded price and fill history</td></tr>
-        <tr><td>/fee_stats</td><td>GET</td><td>Classic transaction fee estimation -p90 percentile used</td></tr>
+        <tr><td>/fee_stats</td><td>GET</td><td>Classic transaction fee estimation (p90 percentile)</td></tr>
       </tbody>
     </table>
   </div>
@@ -676,7 +676,7 @@ flowchart LR
 
   <h3>5.1 How It Works</h3>
 
-  <p>Each channel account has its own independent sequence number and pays its own transaction fees. The operations inside each transaction specify the main trading account as their source -so all offers are created and cancelled under the main account regardless of which channel submitted the transaction. The main account holds all assets. A channel account holds only enough XLM for its base reserve and fees.</p>
+  <p>Each channel account has its own independent sequence number and pays its own transaction fees. The operations inside each transaction specify the main trading account as their source, so all offers are created and cancelled under the main account regardless of which channel submitted the transaction. The main account holds all assets. A channel account holds only enough XLM for its base reserve and fees.</p>
 
   <h3>5.2 Channel State Flow</h3>
 
@@ -712,10 +712,10 @@ flowchart TD
 
   <h3>5.3 Sequence Number Tracking</h3>
 
-  <p>We track sequence numbers locally to avoid fetching them from the network before every transaction. Once a channel loads its sequence from Horizon for the first time, we advance the local counter ourselves each time a transaction is submitted. On any sequence error, we invalidate the local value and re-fetch on the next use.</p>
+  <p>Sequence numbers are tracked locally to avoid fetching them from the network before every transaction. Once a channel loads its sequence from Horizon for the first time, the local counter is advanced each time a transaction is submitted. On any sequence error, the local value is invalidated and re-fetched on the next use.</p>
 
   <div class="callout callout-warning">
-    <p><strong>Horizon returns sequence as a string.</strong> The response is <code>"sequence": "100"</code> -not an integer. It must be converted with <code>int(response["sequence"])</code> before being passed to stellar_sdk.Account. Passing a string causes a TypeError when TransactionBuilder tries to compute sequence + 1.</p>
+    <p><strong>Horizon returns sequence as a string.</strong> The response is <code>"sequence": "100"</code>, not an integer. It must be converted with <code>int(response["sequence"])</code> before being passed to stellar_sdk.Account. Passing a string causes a TypeError when TransactionBuilder tries to compute sequence + 1.</p>
   </div>
 
   <pre>
@@ -739,18 +739,18 @@ def invalidate_sequence(self):
     <table>
       <thead><tr><th>Event</th><th>Sequence Consumed?</th><th>Action</th></tr></thead>
       <tbody>
-        <tr><td>sendTransaction returns PENDING</td><td>Not yet</td><td>Advance local counter -will be consumed when it lands</td></tr>
+        <tr><td>sendTransaction returns PENDING</td><td>Not yet</td><td>Advance local counter — will be consumed when it lands</td></tr>
         <tr><td>getTransaction returns SUCCESS</td><td>Yes</td><td>Counter already advanced</td></tr>
-        <tr><td>getTransaction returns FAILED</td><td>Yes</td><td>TX landed and failed -sequence still consumed</td></tr>
+        <tr><td>getTransaction returns FAILED</td><td>Yes</td><td>TX landed and failed — sequence still consumed</td></tr>
         <tr><td>sendTransaction ERROR TX_BAD_SEQ</td><td>No</td><td>Invalidate counter, re-fetch from Horizon, retry</td></tr>
-        <tr><td>sendTransaction ERROR TX_INSUFF_FEE</td><td>No</td><td>Do not advance -re-fetch /fee_stats, rebuild, retry</td></tr>
+        <tr><td>sendTransaction ERROR TX_INSUFF_FEE</td><td>No</td><td>Do not advance — re-fetch /fee_stats, rebuild, retry</td></tr>
       </tbody>
     </table>
   </div>
 
   <h3>5.4 Fee Provisioner</h3>
 
-  <p>Channel accounts slowly drain XLM from transaction fees. A background task checks balances every thirty seconds and replenishes anything below 1.5 XLM. Channels are replenished to 2.0 XLM. If the main account's available XLM is insufficient to cover all pending replenishments, the provisioner logs a warning and skips the cycle until the user adds funds. All replenishments go into a single multi-operation transaction from the main account -one sequence number, one fee, everything topped up in a single ledger close.</p>
+  <p>Channel accounts slowly drain XLM from transaction fees. A background task checks balances every thirty seconds and replenishes anything below 1.5 XLM. Channels are replenished to 2.0 XLM. If the main account's available XLM is insufficient to cover all pending replenishments, the provisioner logs a warning and skips the cycle until the user adds funds. All replenishments go into a single multi-operation transaction from the main account — one sequence number, one fee, everything topped up in a single ledger close.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Fee Provisioner Loop</div>
@@ -799,7 +799,7 @@ flowchart TD
       <thead><tr><th>Hummingbot Order</th><th>Stellar Operation</th><th>Notes</th></tr></thead>
       <tbody>
         <tr><td>LIMIT SELL</td><td>ManageSellOffer(offer_id=0)</td><td>offer_id=0 creates a new offer</td></tr>
-        <tr><td>LIMIT BUY</td><td>ManageBuyOffer(offer_id=0)</td><td>Amount and price semantics differ from SELL -see section 6.3</td></tr>
+        <tr><td>LIMIT BUY</td><td>ManageBuyOffer(offer_id=0)</td><td>Amount and price semantics differ from SELL — see section 6.3</td></tr>
         <tr><td>LIMIT_MAKER</td><td>CreatePassiveSellOffer</td><td>Will not consume existing offers at the same price</td></tr>
         <tr><td>Cancel</td><td>ManageSellOffer(offer_id=X, amount=0)</td><td>Works for any offer type regardless of how it was placed</td></tr>
       </tbody>
@@ -808,7 +808,7 @@ flowchart TD
 
   <h3>6.2 Two-Phase Order ID</h3>
 
-  <p>Stellar generates offer IDs after a transaction confirms on the ledger. Hummingbot's <code>_place_order</code> needs an <code>exchange_order_id</code> to return synchronously. We use the transaction hash as a temporary ID immediately -it's deterministic and computable before broadcast -then swap it for the real offer ID once the transaction lands.</p>
+  <p>Stellar generates offer IDs after a transaction confirms on the ledger. Hummingbot's <code>_place_order</code> needs an <code>exchange_order_id</code> to return synchronously. The transaction hash serves as a temporary ID immediately — it is deterministic and computable before broadcast — then is swapped for the real offer ID once the transaction lands.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Two-Phase Order ID Resolution</div>
@@ -835,9 +835,9 @@ sequenceDiagram
     </div>
   </div>
 
-  <h3>6.3 Balance Check -BUY vs SELL</h3>
+  <h3>6.3 Balance Check — BUY vs SELL</h3>
 
-  <p>Sell orders and buy orders lock different assets. Getting this wrong means the strategy thinks it has more available balance than it does.</p>
+  <p>Sell orders and buy orders lock different assets. An incorrect calculation results in the strategy overestimating available balance.</p>
 
   <pre>
 SELL order -ManageSellOffer(selling=XLM):
@@ -889,7 +889,7 @@ flowchart TD
     <h2>7. Fill Detection and User Stream</h2>
   </div>
 
-  <p>Fill detection runs through Horizon's account transaction stream. It only delivers transactions involving the main trading account. The connector saves its cursor position and resumes from exactly that point after any disconnection -fills that happen during a gap are never lost.</p>
+  <p>Fill detection runs through Horizon's account transaction stream. It only delivers transactions involving the main trading account. The connector saves its cursor position and resumes from exactly that point after any disconnection — fills that happen during a gap are never lost.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">User Stream Processing</div>
@@ -943,7 +943,7 @@ TransactionMeta union on v:
 
   <h3>7.2 LedgerEntryChanges Parsing</h3>
 
-  <p>Two things to get right here. First, <code>LEDGER_ENTRY_STATE</code> is always a before-state snapshot that immediately precedes a <code>LEDGER_ENTRY_UPDATED</code> record. Skip STATE and process only UPDATED. Second, created and updated entries are <code>LedgerEntry</code> objects that expose type via <code>.data.type</code>. Removed entries are <code>LedgerKey</code> objects with no <code>.data</code> wrapper -type is accessed directly via <code>.type</code>.</p>
+  <p>First, <code>LEDGER_ENTRY_STATE</code> is always a before-state snapshot that immediately precedes a <code>LEDGER_ENTRY_UPDATED</code> record. Skip STATE and process only UPDATED. Second, created and updated entries are <code>LedgerEntry</code> objects that expose type via <code>.data.type</code>. Removed entries are <code>LedgerKey</code> objects with no <code>.data</code> wrapper — type is accessed directly via <code>.type</code>.</p>
 
   <pre>
 # CREATED or UPDATED -LedgerEntry
@@ -973,7 +973,7 @@ BUY order (selling=USDC):
     <h2>8. Balance Management</h2>
   </div>
 
-  <p>Stellar locks XLM for every subentry on an account. Getting the reserve calculation wrong means the bot tries to trade XLM it does not actually have available, which produces failed transactions.</p>
+  <p>Stellar locks XLM for every subentry on an account. An incorrect reserve calculation results in the connector attempting to trade XLM it does not actually have available, which produces failed transactions.</p>
 
   <pre>
 available_XLM = total_XLM
@@ -984,11 +984,11 @@ available_XLM = total_XLM
 
 available_USDC = total_USDC - usdc.selling_liabilities</pre>
 
-  <p>The open offer count requires a separate call to <code>/accounts/id/offers</code> -the <code>subentry_count</code> field on the account response does not break down by type.</p>
+  <p>The open offer count requires a separate call to <code>/accounts/id/offers</code> because the <code>subentry_count</code> field on the account response does not break down by type.</p>
 
   <p>Status polling uses a single batched call to <code>/accounts/id/offers</code> for all open orders rather than one request per order. This keeps Horizon usage flat regardless of how many pairs are running.</p>
 
-  <p>All values from Horizon are strings. Always use <code>Decimal(balance["balance"])</code> -never <code>float()</code>. Floating-point rounding in financial math compounds over thousands of transactions.</p>
+  <p>All values from Horizon are strings. Always use <code>Decimal(balance["balance"])</code>. Never use <code>float()</code>. Floating-point rounding in financial math compounds over thousands of transactions.</p>
 
   <p><code>selling_liabilities</code> must be subtracted per asset. USDC locked in open buy orders shows up in the USDC balance's <code>selling_liabilities</code>, not XLM's.</p>
 </section>
@@ -999,7 +999,7 @@ available_USDC = total_USDC - usdc.selling_liabilities</pre>
     <h2>9. Error Handling</h2>
   </div>
 
-  <p>All error codes come from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code> -typed Python enums. No string comparisons.</p>
+  <p>All error codes come from <code>stellar_sdk.xdr.TransactionResultCode</code> and <code>ManageSellOfferResultCode</code>, both typed Python enums. No string comparisons.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Error Handling Flow</div>
@@ -1054,27 +1054,27 @@ flowchart TD
     </div>
   </div>
 
-  <h4>Transaction-Level Errors -Sequence NOT Consumed</h4>
+  <h4>Transaction-Level Errors — Sequence NOT Consumed</h4>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Code</th><th>Meaning</th><th>Action</th></tr></thead>
       <tbody>
         <tr><td>TX_BAD_SEQ</td><td>Wrong sequence number</td><td>Invalidate local counter, re-fetch from Horizon, retry</td></tr>
         <tr><td>TX_INSUFF_FEE</td><td>Fee below current minimum</td><td>Re-fetch /fee_stats, rebuild with p90 times 3, retry</td></tr>
-        <tr><td>TX_INSUFF_BALANCE</td><td>Not enough XLM to pay the fee</td><td>Log with guidance to add XLM -do not retry</td></tr>
-        <tr><td>TX_BAD_AUTH</td><td>Wrong or missing signatures</td><td>Configuration error -do not retry</td></tr>
+        <tr><td>TX_INSUFF_BALANCE</td><td>Not enough XLM to pay the fee</td><td>Log with guidance to add XLM — do not retry</td></tr>
+        <tr><td>TX_BAD_AUTH</td><td>Wrong or missing signatures</td><td>Configuration error — do not retry</td></tr>
       </tbody>
     </table>
   </div>
 
-  <h4>Operation-Level Errors -TX_FAILED -Sequence IS Consumed</h4>
+  <h4>Operation-Level Errors (TX_FAILED) — Sequence IS Consumed</h4>
   <div class="table-wrap">
     <table>
       <thead><tr><th>Code</th><th>Meaning</th><th>Action</th></tr></thead>
       <tbody>
         <tr><td>MANAGE_SELL_OFFER_LOW_RESERVE</td><td>Not enough XLM for the subentry reserve</td><td>Fail with guidance to reduce open orders or add XLM</td></tr>
-        <tr><td>MANAGE_SELL_OFFER_UNDERFUNDED</td><td>Insufficient asset balance</td><td>Pre-check should catch this first -log and fail</td></tr>
-        <tr><td>MANAGE_SELL_OFFER_NOT_FOUND</td><td>Offer already gone (common on cancel)</td><td>Check trade history -emit FILLED or CANCELED accordingly</td></tr>
+        <tr><td>MANAGE_SELL_OFFER_UNDERFUNDED</td><td>Insufficient asset balance</td><td>Pre-check should catch this; log and fail</td></tr>
+        <tr><td>MANAGE_SELL_OFFER_NOT_FOUND</td><td>Offer already gone (common on cancel)</td><td>Check trade history — emit FILLED or CANCELED accordingly</td></tr>
         <tr><td>MANAGE_SELL_OFFER_SELL_NO_TRUST</td><td>No trustline for the selling asset</td><td>Fail with guidance to create the trustline</td></tr>
       </tbody>
     </table>
@@ -1087,7 +1087,7 @@ flowchart TD
     <h2>10. Network Validation at Startup</h2>
   </div>
 
-  <p>Before accepting any orders, the connector validates that the RPC endpoint and Horizon endpoint are on the same network. The most common configuration mistake -pointing one at Testnet and the other at Mainnet -is caught here before a single trade is attempted.</p>
+  <p>Before accepting any orders, the connector validates that the RPC endpoint and Horizon endpoint are on the same network. The most common configuration mistake, pointing one at Testnet and the other at Mainnet, is caught here before a single trade is attempted.</p>
 
   <div class="diagram-wrap">
     <div class="diagram-label">Startup Validation</div>
@@ -1129,7 +1129,7 @@ flowchart TD
 <!-- 11. AMM -->
 <section id="amm">
   <div class="section-header">
-    <h2>11. AMM Integration - Phase 2</h2>
+    <h2>11. AMM Integration — Phase 2</h2>
   </div>
 
   <div class="phase-note">
@@ -1177,22 +1177,22 @@ flowchart LR
     </div>
   </div>
 
-  <h3>Soroban AMM -Three-Step Flow</h3>
+  <h3>Soroban AMM — Three-Step Flow</h3>
 
-  <p>Every Soroban contract interaction requires three steps. You cannot skip the simulation -it is how the protocol determines what ledger keys the contract will read and write, which must be declared in advance.</p>
+  <p>Every Soroban contract interaction requires three steps. The simulation step cannot be omitted; it is how the protocol determines what ledger keys the contract will read and write, which must be declared in advance.</p>
 
   <div class="table-wrap">
     <table>
       <thead><tr><th>Step</th><th>RPC Call</th><th>Purpose</th></tr></thead>
       <tbody>
-        <tr><td>1 -Simulate</td><td>simulateTransaction</td><td>Returns the required footprint (all ledger keys to read and write) and the resource fee estimate</td></tr>
-        <tr><td>2 -Assemble</td><td>assembleTransaction (SDK)</td><td>Attaches the footprint and resource limits to the transaction</td></tr>
-        <tr><td>3 -Submit</td><td>sendTransaction</td><td>Signs and broadcasts the fully assembled transaction</td></tr>
+        <tr><td>1 — Simulate</td><td>simulateTransaction</td><td>Returns the required footprint (all ledger keys to read and write) and the resource fee estimate</td></tr>
+        <tr><td>2 — Assemble</td><td>assembleTransaction (SDK)</td><td>Attaches the footprint and resource limits to the transaction</td></tr>
+        <tr><td>3 — Submit</td><td>sendTransaction</td><td>Signs and broadcasts the fully assembled transaction</td></tr>
       </tbody>
     </table>
   </div>
 
-  <p>Price comparison between the SDEX and a Soroban AMM uses pool reserve reads via <code>getContractData</code> to compute the output amount off-chain rather than running a full simulation per routing decision. Simulation adds 200 to 500 milliseconds per call -not acceptable before every order.</p>
+  <p>Price comparison between the SDEX and a Soroban AMM uses pool reserve reads via <code>getContractData</code> to compute the output amount off-chain rather than running a full simulation per routing decision. Simulation adds 200 to 500 milliseconds per call, which is prohibitive before every order.</p>
 </section>
 
 <!-- 12. Hummingbot contract -->
@@ -1208,16 +1208,16 @@ flowchart LR
       <thead><tr><th>Method</th><th>Implementation</th></tr></thead>
       <tbody>
         <tr><td>_place_order</td><td>ManageSellOffer, ManageBuyOffer, or CreatePassiveSellOffer depending on order type</td></tr>
-        <tr><td>_place_cancel</td><td>ManageSellOffer(offer_id=X, amount=0) -works for all offer types</td></tr>
-        <tr><td>_update_balances</td><td>Horizon /accounts/id plus /accounts/id/offers -one batched call for all open orders</td></tr>
-        <tr><td>_request_order_status</td><td>Horizon /accounts/id/offers -single call covers everything</td></tr>
+        <tr><td>_place_cancel</td><td>ManageSellOffer(offer_id=X, amount=0), applicable to all offer types</td></tr>
+        <tr><td>_update_balances</td><td>Horizon /accounts/id plus /accounts/id/offers — one batched call for all open orders</td></tr>
+        <tr><td>_request_order_status</td><td>Horizon /accounts/id/offers — single call covers everything</td></tr>
         <tr><td>_all_trade_updates_for_order</td><td>Horizon /accounts/id/trades?offer_id=X</td></tr>
         <tr><td>_get_fee</td><td>0% trading fee (SDEX has none) plus flat XLM network fee</td></tr>
         <tr><td>_get_last_traded_prices</td><td>Horizon /accounts/id/trades with limit=1 and order=desc</td></tr>
-        <tr><td>_format_trading_rules</td><td>Static -1.0 XLM minimum order size, 7 decimal places precision</td></tr>
-        <tr><td>_update_trading_fees</td><td>Static -SDEX has no trading fee, always returns 0%</td></tr>
+        <tr><td>_format_trading_rules</td><td>Static — 1.0 XLM minimum order size, 7 decimal places precision</td></tr>
+        <tr><td>_update_trading_fees</td><td>Static — SDEX has no trading fee, always returns 0%</td></tr>
         <tr><td>check_network</td><td>getLatestLedger plus passphrase check plus orderbook stream health flag</td></tr>
-        <tr><td>_user_stream_event_listener</td><td>Process Horizon SSE transaction events -parse fills, emit OrderUpdate and TradeUpdate</td></tr>
+        <tr><td>_user_stream_event_listener</td><td>Process Horizon SSE transaction events — parse fills, emit OrderUpdate and TradeUpdate</td></tr>
       </tbody>
     </table>
   </div>
@@ -1233,7 +1233,7 @@ flowchart LR
     <h2>13. Security</h2>
   </div>
 
-  <p>The connector inherits Hummingbot's native security model. We do not add separate credential management on top of it.</p>
+  <p>The connector inherits Hummingbot's native security model. No additional credential management layer is introduced.</p>
 
   <div class="table-wrap">
     <table>
@@ -1255,23 +1255,23 @@ flowchart LR
   </div>
 
   <h3>Why a direct Python connector and not a Gateway?</h3>
-  <p>Hummingbot accepts ExchangePyBase subclasses as first-class connectors that go into the main repository. Gateway connectors are used when an exchange requires a JavaScript SDK that cannot run in Python. The Stellar Python SDK covers everything we need. A Gateway would mean a Node.js server, a separate Docker container, SSL certificates, and an HTTP hop between Hummingbot and the connector -none of that is necessary here.</p>
+  <p>Hummingbot accepts ExchangePyBase subclasses as first-class connectors that go into the main repository. Gateway connectors are used when an exchange requires a JavaScript SDK that cannot run in Python. The Stellar Python SDK provides complete coverage. A Gateway would mean a Node.js server, a separate Docker container, SSL certificates, and an HTTP hop between Hummingbot and the connector — none of that is necessary here.</p>
 
   <h3>Why Horizon for orderbook data and not Stellar RPC?</h3>
-  <p>Stellar RPC is designed for Soroban smart contract interactions. It has no endpoint for reading OfferEntry records, which are classic ledger entries in the BucketList. The SDEX orderbook cannot be built from event streaming because open offers have no historical event -they are persistent state. Horizon's <code>/order_book</code> endpoint reads that state directly and is the only production-ready way to do it today. When Portfolio APIs add orderbook access, the market data layer is behind a single abstraction that makes the swap a one-file change.</p>
+  <p>Stellar RPC is designed for Soroban smart contract interactions. It has no endpoint for reading OfferEntry records, which are classic ledger entries in the BucketList. The SDEX orderbook cannot be built from event streaming because open offers have no historical event — they are persistent state. Horizon's <code>/order_book</code> endpoint reads that state directly and is the only production-ready way to do it today. When Portfolio APIs add orderbook access, the market data layer is behind a single abstraction that makes the swap a one-file change.</p>
 
   <h3>Why local sequence number tracking?</h3>
-  <p>Fetching the channel's current sequence from Horizon before every transaction adds 100 to 300 milliseconds per submission. With five channels running during a fast order refresh cycle, that latency adds up. Local tracking eliminates the cost entirely. On any sequence error, we invalidate the local value and re-fetch -recovery is automatic with no manual intervention.</p>
+  <p>Fetching the channel's current sequence from Horizon before every transaction adds 100 to 300 milliseconds per submission. With five channels running during a fast order refresh cycle, that latency adds up. Local tracking eliminates the cost entirely. On any sequence error, the local value is invalidated and re-fetched — recovery is automatic with no manual intervention.</p>
 
   <h3>Why batch all replenishments into one transaction?</h3>
-  <p>Replenishing five channels with five separate Payment transactions would require five sequential submissions from the main account -five sequence numbers, five fees, five ledger closes. Batching them into one multi-operation transaction uses one sequence number and one fee. Stellar allows up to 100 operations per transaction, so this scales without any changes to the architecture.</p>
+  <p>Replenishing five channels with five separate Payment transactions would require five sequential submissions from the main account — five sequence numbers, five fees, five ledger closes. Batching them into one multi-operation transaction uses one sequence number and one fee. Stellar allows up to 100 operations per transaction, so this scales without any changes to the architecture.</p>
 </section>
 
 </div>
 
 <footer>
-  Stellar SDEX Hummingbot Connector - Technical Architecture v2.0<br/>
-  Tharun Ekambaram &amp; Daniel Zilper | March 14, 2026
+  Stellar SDEX Hummingbot Connector — Technical Architecture v2.0<br/>
+  Tharun Ekambaram &amp; Daniel Zilper
 </footer>
 
 </body>
